@@ -17,13 +17,16 @@ Quick Start
 
 To deploy the cluster you can use :
 
-### Ansible
+### Ansible with Raspberry Pis cluster
+Raspian 9 is installed on PIs systems.
 
 #### Ansible version
 
 Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansible/issues/46600](https://github.com/ansible/ansible/issues/46600)
 
 #### Usage
+    # Install pip [from python](https://pip.readthedocs.io/en/stable/installing/)
+    sudo python get-pip.py
 
     # Install dependencies from ``requirements.txt``
     sudo pip install -r requirements.txt
@@ -31,15 +34,29 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
 
-    # Update Ansible inventory file with inventory builder
-    declare -a IPS=(10.10.1.3 10.10.1.4 10.10.1.5)
+    # Update Ansible inventory file with inventory builder . Single master IP is possible, see bastion node
+    declare -a IPS=(192.168.0.16 192.168.0.17)
     CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
-
+    cat inventory/mycluster/hosts.ini
+    # bastion single master looks like `raspberrypi ansible_ssh_host=192.168.0.16 ip=192.168.0.16` ansible_host=192.168.0.16  ansible_user=pi"
     # Review and change parameters under ``inventory/mycluster/group_vars``
     cat inventory/mycluster/group_vars/all/all.yml
     cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
 
-    # Deploy Kubespray with Ansible Playbook - run the playbook as root
+    # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
+    for ip in ${IPS[@]}; do ssh-copy-id pi@$ip; done
+
+    # Enable SSH interface and PermitRootLogin over ssh in Raspberry
+    for ip in ${IPS[@]}; do
+      ssh pi@$ip
+      sudo echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+      cat /etc/ssh/sshd_config | grep PermitRootLogin
+    done
+
+    # Adjust the ansible_memtotal_mb to your Raspberry specs
+    cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
+
+    # Deploy Kubespray with Ansible Playbook - run the playbook as pi
     # The option `-b` is required, as for example writing SSL keys in /etc/,
     # installing packages and interacting with various systemd daemons.
     # Without -b the playbook will fail to run!
