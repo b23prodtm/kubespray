@@ -65,7 +65,7 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # The option `-b` is required, as for example writing SSL keys in /etc/,
     # installing packages and interacting with various systemd daemons.
     # Without -b the playbook will fail to run!
-    ansible-playbook -i inventory/mycluster/hosts.ini --become --become-user=root cluster.yml
+    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa     
     
     # When you encounter the Error : no PUBKEY ... could be received from GPG
     # Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
