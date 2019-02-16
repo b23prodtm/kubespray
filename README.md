@@ -51,6 +51,11 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
       ssh pi@$ip
       sudo echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
       cat /etc/ssh/sshd_config | grep PermitRootLogin
+     # for etcd to install on nodes
+      sudo apt-get install golang
+     # Ansible is reported as a trusted repository
+      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+     # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
     done
 
     # Adjust the ansible_memtotal_mb to your Raspberry specs
@@ -61,6 +66,11 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # installing packages and interacting with various systemd daemons.
     # Without -b the playbook will fail to run!
     ansible-playbook -i inventory/mycluster/hosts.ini --become --become-user=root cluster.yml
+    
+    # When you encounter the Error : no PUBKEY ... could be received from GPG
+    # Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
+    # Setup actually the playbook on hosts
+    scripts/setup_playbook.sh
 
 Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
