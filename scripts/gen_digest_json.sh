@@ -2,7 +2,7 @@
 declare -a version=(v1.10.0 v1.10.1 v1.10.11 v1.10.2 v1.10.3 v1.10.4 v1.10.5 v1.10.6 v1.10.7 v1.10.8 v1.11.0 v1.11.1 v1.11.2 v1.11.3 v1.11.5 v1.12.0 v1.12.1 v1.12.2 v1.12.3 v1.12.4 v1.12.5 v1.13.0 v1.13.1 v1.13.2 v1.13.3)
 image=$1
 image_arch=$2
-[[ "$#" -lt 3 ]] && echo 'Usage: $0 --etcd|--cni|<image> <image_arch> version_list' && exit 1;
+[[ "$#" -lt 3 ]] && echo 'Usage: $0 --etcd|--cni|<image> <image_arch> version_list<vN.XY.Z vO.W.V.T ...>' && exit 1;
 while [ "$#" -gt 0 ]; do case "$1" in
   --etcd)
     image="etcd"
