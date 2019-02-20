@@ -50,6 +50,8 @@ $kube_node_instances = $num_instances
 $kube_node_instances_with_disks = false
 $kube_node_instances_with_disks_size = "20G"
 $kube_node_instances_with_disks_number = 2
+$override_disk_size = false
+$disk_size = "20GB"
 
 $playbook = "cluster.yml"
 
@@ -97,6 +99,13 @@ Vagrant.configure("2") do |config|
   # always use Vagrants insecure key
   config.ssh.insert_key = false
 
+  if ($override_disk_size)
+    unless Vagrant.has_plugin?("vagrant-disksize")
+      system "vagrant plugin install vagrant-disksize"
+    end
+    config.disksize.size = $disk_size
+  end
+
   (1..$num_instances).each do |i|
     config.vm.define vm_name = "%s-%01d" % [$instance_name_prefix, i] do |node|
 
@@ -120,6 +129,7 @@ Vagrant.configure("2") do |config|
         vb.cpus = $vm_cpus
         vb.gui = $vm_gui
         vb.linked_clone = true
+        vb.customize ["modifyvm", :id, "--vram", "8"] # ubuntu defaults to 256 MB which is a waste of precious RAM
       end
 
       node.vm.provider :libvirt do |lv|
