@@ -61,16 +61,33 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # Adjust the ansible_memtotal_mb to your Raspberry specs
     cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 
-    # Deploy Kubespray with Ansible Playbook - run the playbook as pi
-    # The option `-b` is required, as for example writing SSL keys in /etc/,
-    # installing packages and interacting with various systemd daemons.
-    # Without -b the playbook will fail to run!
-    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa     
-    
-    # When you encounter the Error : no PUBKEY ... could be received from GPG
-    # Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
-    # Setup actually the playbook on hosts
+    # Shortcut to actually set up the playbook on hosts:
     scripts/setup_playbook.sh
+
+
+### FAQ :
+* *When you encounter the Error : no PUBKEY ... could be received from GPG
+Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
+
+* *Deploy Kubespray with Ansible Playbook to raspberrypi
+The option `-b` is required, as for example writing SSL keys in /etc/,
+installing packages and interacting with various systemd daemons.
+Without -b the playbook will fail to run!
+
+    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa  
+
+See [docs](./docs/ansible.md)
+
+* *TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+
+    fatal: [raspberrypi]: FAILED! => {
+        "assertion": "ip in ansible_all_ipv4_addresses",
+        "changed": false,
+        "evaluated_to": false,
+        "msg": "Assertion failed"
+    }
+
+The host _ip_ set in ```inventory/<mycluster>/hosts.ini``` is not the docker network interface (iface). Run cmd: ```ifconfig docker0``` to find the ipv4 address that is attributed to the docker0 iface. E.g. _172.17.0.1_
 
 Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
