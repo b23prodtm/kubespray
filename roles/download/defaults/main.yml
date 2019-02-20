@@ -37,8 +37,8 @@ image_arch: "{{host_architecture | default('amd64')}}"
 # Versions
 kube_version: v1.13.3
 kubeadm_version: "{{ kube_version }}"
-# Only compatible version with Pi3 B+
-etcd_version: v3.1.20
+# Only compatible version with Pi3
+etcd_version: v3.3.12
 
 # kubernetes image repo define
 kube_image_repo: "gcr.io/google-containers"
@@ -230,9 +230,9 @@ kubeadm_checksums:
     v1.10.0: ebbac985834289037b544523c3e2f39bb44bea938aca9d9e88ef7e880fb8472f
 
 etcd_binary_checksums:
-  arm: e28a5d0dfb9c323579cf6d0fe49e91234a4628c0c501197d610a3c20ea2286cb
-  arm64: 7d3db622fb8d22a669a9351e1002ed2a7a776004a4a35888734bf39323889390
-  amd64: 947849dbcfa13927c81236fb76a7c01d587bbab42ab1e807184cd91b026ebed7
+  arm: 170b848ac1a071fe7d495d404a868a2c0090750b2944f8a260ef1c6125b2b4f4
+  arm64: 170b848ac1a071fe7d495d404a868a2c0090750b2944f8a260ef1c6125b2b4f4
+  amd64: dc5d82df095dae0a2970e4d870b6929590689dd707ae3d33e7b86da0f7f211b6
 cni_binary_checksums:
   arm: ffb62021d2fc6e1266dc6ef7f2058125b6e6b44c016291a2b04a15ed9b4be70a
   arm64: 016bbc989877e35e3cd49fafe11415fb2717e52c74fde6b1650411154cb91b81
