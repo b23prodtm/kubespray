@@ -34,27 +34,27 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
 
-    # Update Ansible inventory file with inventory builder . Single master IP is possible, see bastion node
+    # Update Ansible inventory file with inventory builder . Single master IP is possible, see nodes with bastion
     declare -a IPS=(192.168.0.16 192.168.0.17)
     CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
     cat inventory/mycluster/hosts.ini
-    # bastion single master looks like `raspberrypi ansible_ssh_host=192.168.0.16 ip=192.168.0.16` ansible_host=192.168.0.16  ansible_user=pi"
+    # bastion single master looks like `raspberrypi ansible_ssh_host=192.168.0.16 ip=192.168.0.16` ansible_host=192.168.0.16  ansible_user=pi" # replace 'pi' with 'ubuntu' or any other user
     # Review and change parameters under ``inventory/mycluster/group_vars``
     cat inventory/mycluster/group_vars/all/all.yml
     cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
 
     # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
-    for ip in ${IPS[@]}; do ssh-copy-id pi@$ip; done
-
-    # Enable SSH interface and PermitRootLogin over ssh in Raspberry
+    declare PI=pi # replace 'pi' with 'ubuntu' or any other user
+    for ip in ${IPS[@]}; do ssh-copy-id $PI@$ip; done
+    # Enable SSH interface and PermitRootLogin over ssh in Raspberry    
     for ip in ${IPS[@]}; do
-      ssh pi@$ip
-      sudo echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-      cat /etc/ssh/sshd_config | grep PermitRootLogin
+      ssh $PI@$ip
+      sudo echo "PermitRootLogin yes" >> /etc/ssh/sshd_config;
+      cat /etc/ssh/sshd_config | grep PermitRootLogin;
      # for etcd to install on nodes
-      sudo apt-get install golang
+      sudo apt-get install golang -y;
      # Ansible is reported as a trusted repository
-      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
      # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
     done
 
