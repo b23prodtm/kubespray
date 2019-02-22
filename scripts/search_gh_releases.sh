@@ -18,5 +18,3 @@ fi
 cd github-release-search
 npm run fetch -- $*
 npm run search -- $*
-
-
