@@ -48,14 +48,27 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     for ip in ${IPS[@]}; do ssh-copy-id $PI@$ip; done
     # Enable SSH interface and PermitRootLogin over ssh in Raspberry    
     for ip in ${IPS[@]}; do
-      ssh $PI@$ip
-      sudo echo "PermitRootLogin yes" >> /etc/ssh/sshd_config;
-      cat /etc/ssh/sshd_config | grep PermitRootLogin;
-     # for etcd to install on nodes
-      sudo apt-get install golang -y;
+      ssh $PI@$ip sudo bash -c "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config";
+      ssh $PI@$ip cat /etc/ssh/sshd_config | grep PermitRootLogin;
+     # To install etcd on nodes, Go lang is needed
+      ssh $PI@$ip sudo apt-get install golang -y;
      # Ansible is reported as a trusted repository
-      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
+      ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
      # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
+
+     # Get docker-ce (Read Ubuntu LTS https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+      ssh $PI@$pi sudo apt-get remove docker docker-engine docker.io containerd runc -y;
+     # Install packages to allow apt to use a repository over HTTPS
+      ssh $PI@$pi sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y;
+     # Add Docker’s official GPG key
+      ssh $PI@$pi curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
+     # Use the following command to set up the stable repository.
+      ssh $PI@$pi sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable";
+
+     # Install Docker Community Edition
+      ssh $PI@$pi sudo apt-get update && sudo apt-get install docker-ce -y;
+     # Install the latest version of Docker CE and containerd
+      ssh $PI@$pi sudo apt-get install docker-ce-cli containerd.io -y;
     done
 
     # Adjust the ansible_memtotal_mb to your Raspberry specs
