@@ -1,11 +1,11 @@
-![Kubernetes Logo](https://raw.githubusercontent.com/kubernetes-sigs/kubespray/master/docs/img/kubernetes-logo.png)
+￼
 
 Deploy a Production Ready Kubernetes Cluster
-============================================
 
-If you have questions, join us on the [kubernetes slack](https://kubernetes.slack.com), channel **\#kubespray**.
-You can get your invite [here](http://slack.k8s.io/)
+If you have questions, join us on the kubernetes slack , channel #kubespray . You can get your invite here Please report any issue with GitHub.
 
+
+>Could be deployed on AWS, GCE, Azure, OpenStack, vSphere, Oracle Cloud Infrastructure (Experimental), or Baremetal
 -   Can be deployed on **AWS, GCE, Azure, OpenStack, vSphere, Oracle Cloud Infrastructure (Experimental), or Baremetal**
 -   **Highly available** cluster
 -   **Composable** (Choice of the network plugin for instance)
@@ -18,13 +18,13 @@ Quick Start
 To deploy the cluster you can use :
 
 ### Ansible with Raspberry Pis cluster
-Raspian 9 is installed on PIs systems.
-
+~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries. [see PR](https://github.com/kubernetes-sigs/kubespray/pull/4261)
 #### Ansible version
 
 Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansible/issues/46600](https://github.com/ansible/ansible/issues/46600)
 
 #### Usage
+
     # Install pip [from python](https://pip.readthedocs.io/en/stable/installing/)
     sudo python get-pip.py
 
@@ -76,33 +76,12 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
 
     # Shortcut to actually set up the playbook on hosts:
     scripts/setup_playbook.sh
-
-
-### FAQ :
-* *When you encounter the Error : no PUBKEY ... could be received from GPG
-Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
-
-* *Deploy Kubespray with Ansible Playbook to raspberrypi
-The option `-b` is required, as for example writing SSL keys in /etc/,
-installing packages and interacting with various systemd daemons.
-Without -b the playbook will fail to run!
-
-    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa  
+    # or you can use the extended version as well
+    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa  
 
 See [docs](./docs/ansible.md)
 
-* *TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
-
-    fatal: [raspberrypi]: FAILED! => {
-        "assertion": "ip in ansible_all_ipv4_addresses",
-        "changed": false,
-        "evaluated_to": false,
-        "msg": "Assertion failed"
-    }
-
-The host _ip_ set in ```inventory/<mycluster>/hosts.ini``` is not the docker network interface (iface). Run cmd: ```ifconfig docker0``` to find the ipv4 address that is attributed to the docker0 iface. E.g. _172.17.0.1_
-
-Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
+>Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
 ```
 ERROR! no action detected in task. This often indicates a misspelled module name, or incorrect module path.
@@ -111,6 +90,31 @@ probably pointing on a task depending on a module present in requirements.txt (i
 
 One way of solving this would be to uninstall the Ansible package and then, to install it via pip but it is not always possible.
 A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip packages installation location, which can be found in the Location field of the output of `pip show [package]` before executing `ansible-playbook`.
+
+#### Known issues :
+See [docs](./docs/ansible.md)
+
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the kubernetes stack.
+
+- When you see the Error : no PUBKEY ... could be received from GPG Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
+
+- Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
+
+ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
+
+- ```scripts/setup_playbook.sh```
+ command will fail with:
+
+    TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+
+    fatal: [raspberrypi]: FAILED! => {
+        "assertion": "ip in ansible_all_ipv4_addresses",
+        "changed": false,
+        "evaluated_to": false,
+        "msg": "Assertion failed"
+    }
+
+The host *ip* set in ```inventory/<mycluster>/hosts.ini``` is not the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that is attributed to the docker0 iface. E.g. _172.17.0.1_
 
 ### Vagrant
 
@@ -161,6 +165,7 @@ Supported Linux Distributions
 -   **Fedora** 28
 -   **Fedora/CentOS** Atomic
 -   **openSUSE** Leap 42.3/Tumbleweed
+• Ubuntu 16.04, 18.04 (Raspberries)
 
 Note: Upstart/SysV init based OS types are not supported.
 
