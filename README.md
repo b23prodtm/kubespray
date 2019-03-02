@@ -17,7 +17,8 @@ Quick Start
 To deploy the cluster you can use :
 
 ### Ansible with Raspberry Pis cluster
-~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries. [see PR](https://github.com/kubernetes-sigs/kubespray/pull/4261)
+~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries, [Download and flash the classic Server for ARM64](https://wiki.ubuntu.com/ARM/RaspberryPi). [see PR](https://github.com/kubernetes-sigs/kubespray/pull/4261)
+
 #### Ansible version
 
 Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansible/issues/46600](https://github.com/ansible/ansible/issues/46600)
@@ -92,6 +93,19 @@ A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` en
 
 #### Known issues :
 See [docs](./docs/ansible.md)
+
+- CGROUPS_MEMORY missing to use ```kubeadm init```
+
+    [ERROR SystemVerification]: missing cgroups: memory
+
+The Linux kernel must be loaded with special cgroups enabled. Add the following to the kernel parameters:
+
+    cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+
+E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run as regular user with sudo privileges:
+
+    sed "$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/" /boot/firmware/cmdline.txt | sudo tee /boot/firmware/cmdline.txt
+    reboot
 
 - I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the kubernetes stack.
 
