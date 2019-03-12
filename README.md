@@ -77,7 +77,7 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # Shortcut to actually set up the playbook on hosts:
     scripts/setup_playbook.sh
     # or you can use the extended version as well
-    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa  
+    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=$PI --private-key=~/.ssh/id_rsa  
 
 See [docs](./docs/ansible.md)
 
@@ -106,6 +106,12 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
 
     sed "$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/" /boot/firmware/cmdline.txt | sudo tee /boot/firmware/cmdline.txt
     reboot
+
+I see the msg: "Timed out (12s) waiting for privileges escalation"
+
+The ansible_user or --become_user must gain root privileges without password authentication. That's simply to edit the sudoers and add NOPASSWD: ALL to %admin and %sudo user group. E.g. from ansible host shell :
+
+    ssh <ansible_user>@<bastion-ip> 'sudo visudo; sudo reboot'
 
 - I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the kubernetes stack.
 
