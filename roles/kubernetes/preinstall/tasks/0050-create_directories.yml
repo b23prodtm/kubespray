@@ -5,7 +5,7 @@
     state: directory
     owner: kube
   when: inventory_hostname in groups['k8s-cluster']
-  become: true
+  become: yes
   tags:
     - kubelet
     - k8s-secrets

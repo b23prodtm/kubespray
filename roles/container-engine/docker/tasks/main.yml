@@ -146,6 +146,7 @@
   when: ansible_distribution in ["CentOS","RedHat"] and not is_atomic
 
 - name: ensure docker packages are installed
+  become: yes
   action: "{{ docker_package_info.pkg_mgr }}"
   args:
     pkg: "{{item.name}}"

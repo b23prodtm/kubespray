@@ -25,11 +25,11 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
 
 #### Usage
 
-    # Install pip [from python](https://pip.readthedocs.io/en/stable/installing/)
-    sudo python get-pip.py
+    # Install pip3 [from python](https://pip.readthedocs.io/en/stable/installing/)
+    sudo python3 get-pip.py
 
     # Install dependencies from ``requirements.txt``
-    sudo pip install -r requirements.txt
+    sudo pip3 install -r requirements.txt
 
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
@@ -81,18 +81,26 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
 
 See [docs](./docs/ansible.md)
 
->Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
+>Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
 ```
 ERROR! no action detected in task. This often indicates a misspelled module name, or incorrect module path.
 ```
 probably pointing on a task depending on a module present in requirements.txt (i.e. "unseal vault").
 
-One way of solving this would be to uninstall the Ansible package and then, to install it via pip but it is not always possible.
-A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip packages installation location, which can be found in the Location field of the output of `pip show [package]` before executing `ansible-playbook`.
+One way of solving this would be to uninstall the Ansible package and then, to install it via pip3 but it is not always possible.
+A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip3 packages installation location, which can be found in the Location field of the output of `pip3 show [package]` before executing `ansible-playbook`.
 
 #### Known issues :
 See [docs](./docs/ansible.md)
+
+- ModuleNotFoundError: No module named 'ruamel'
+```Traceback (most recent call last):
+  File "contrib/inventory_builder/inventory.py", line 36, in <module>
+    from ruamel.yaml import YAML
+```
+Please install inventory builder python libraries.
+>  sudo pip3 install -r contrib/inventory_builder/requirements.txt
 
 - CGROUPS_MEMORY missing to use ```kubeadm init```
 
@@ -140,14 +148,14 @@ The host *ip* set in ```inventory/<mycluster>/hosts.ini``` is not the docker net
 ### Vagrant
 
 For Vagrant we need to install python dependencies for provisioning tasks.
-Check if Python and pip are installed:
+Check if Python3 and pip3 are installed:
 
-    python -V && pip -V
+    python3 -V && pip3 -V
 
 If this returns the version of the software, you're good to go. If not, download and install Python from here <https://www.python.org/downloads/source/>
 Install the necessary requirements
 
-    sudo pip install -r requirements.txt
+    sudo pip3 install -r requirements.txt
     vagrant up
 
 Documents

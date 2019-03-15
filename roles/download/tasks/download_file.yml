@@ -16,6 +16,7 @@
     - group_names | intersect(download.groups) | length
 
 - name: file_download | Download item
+  become: yes
   get_url:
     url: "{{download.url}}"
     dest: "{{download.dest}}"
@@ -36,6 +37,7 @@
     - group_names | intersect(download.groups) | length
 
 - name: file_download | Extract archives
+  become: yes
   unarchive:
     src: "{{download.dest}}"
     dest: "{{download.dest|dirname}}"
