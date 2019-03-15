@@ -115,6 +115,8 @@ The ansible_user or --become_user must gain root privileges without password aut
 
 - I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the kubernetes stack.
 
+- Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
+
 - When you see the Error : no PUBKEY ... could be received from GPG Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
 
 - Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
