@@ -17,7 +17,7 @@
   become: yes
   shell: "pvs {{ disk_volume_device_1 }} --option vg_name | tail -n+2"
   register: "volume_groups"
-  ignore_errors: true
+  ignore_errors: yes
   changed_when: false
 
 - name: "Remove volume groups."
@@ -29,7 +29,7 @@
 - name: "Remove physical volume from cluster disks."
   become: yes
   command: "pvremove {{ disk_volume_device_1 }} --yes"
-  ignore_errors: true
+  ignore_errors: yes
 
 - name: "Remove lvm utils (RedHat)"
   become: yes

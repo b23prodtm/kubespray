@@ -17,7 +17,10 @@ Quick Start
 To deploy the cluster you can use :
 
 ### Ansible with Raspberry Pis cluster
-~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries, [Download and flash the classic Server for ARM64](https://wiki.ubuntu.com/ARM/RaspberryPi). [see PR](https://github.com/kubernetes-sigs/kubespray/pull/4261)
+~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries, [Download and flash the classic Server for ARM64](https://wiki.ubuntu.com/ARM/RaspberryPi). Also for Raspberry see current Pull Requests:
+
+- [ARM](https://github.com/kubernetes-sigs/kubespray/pull/4261)
+- [ARM64](https://github.com/kubernetes-sigs/kubespray/pull/4171)
 
 #### Ansible version
 
@@ -69,6 +72,9 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
       ssh $PI@$pi sudo apt-get update && sudo apt-get install docker-ce -y;
      # Install the latest version of Docker CE and containerd
       ssh $PI@$pi sudo apt-get install docker-ce-cli containerd.io -y;
+
+    # The kube user which owns k8s daemons must be added to Ubuntu group.
+      ssh $PI@$pi sudo usermod -a -G ubuntu kube;
     done
 
     # Adjust the ansible_memtotal_mb to your Raspberry specs
@@ -77,7 +83,7 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     # Shortcut to actually set up the playbook on hosts:
     scripts/setup_playbook.sh
     # or you can use the extended version as well
-    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=$PI --private-key=~/.ssh/id_rsa  
+    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --private-key=~/.ssh/id_rsa  
 
 See [docs](./docs/ansible.md)
 
@@ -117,11 +123,11 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
 
 I see the msg: "Timed out (12s) waiting for privileges escalation"
 
-The ansible_user or --become_user must gain root privileges without password authentication. That's simply to edit the sudoers and add NOPASSWD: ALL to %admin and %sudo user group. E.g. from ansible host shell :
+The ansible_user or --become_user must gain root privileges without password prompt. That's simply to edit the sudoers and add NOPASSWD: ALL to %admin and %sudo user group. E.g. from ansible host shell :
 
     ssh <ansible_user>@<bastion-ip> 'sudo visudo; sudo reboot'
 
-- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the kubernetes stack.
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
 
 - Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
 
@@ -144,6 +150,12 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-use
     }
 
 The host *ip* set in ```inventory/<mycluster>/hosts.ini``` is not the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that is attributed to the docker0 iface. E.g. _172.17.0.1_
+
+- Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
+
+The file located at /etc/ssl/etcd is owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
+
+      ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
 
 ### Vagrant
 

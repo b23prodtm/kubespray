@@ -135,7 +135,7 @@
 - name: Check if vsphere-cloud-provider ClusterRole exists
   command: "{{ bin_dir }}/kubectl get clusterroles system:vsphere-cloud-provider"
   register: vsphere_cloud_provider
-  ignore_errors: true
+  ignore_errors: yes
   when:
     - rbac_enabled
     - cloud_provider is defined

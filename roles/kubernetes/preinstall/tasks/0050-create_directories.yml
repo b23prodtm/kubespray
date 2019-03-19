@@ -1,11 +1,12 @@
 ---
 - name: Create kubernetes directories
+  become: yes
+  ignore_errors: yes
   file:
     path: "{{ item }}"
     state: directory
     owner: kube
   when: inventory_hostname in groups['k8s-cluster']
-  become: yes
   tags:
     - kubelet
     - k8s-secrets
@@ -24,6 +25,8 @@
     - "{{ kube_script_dir }}"
 
 - name: Create cni directories
+  become: yes
+  ignore_errors: yes
   file:
     path: "{{ item }}"
     state: directory
@@ -46,6 +49,8 @@
     - bootstrap-os
 
 - name: Create local volume provisioner directories
+  become: yes
+  ignore_errors: yes
   file:
     path: "{{ local_volume_provisioner_storage_classes[item].host_dir }}"
     state: directory

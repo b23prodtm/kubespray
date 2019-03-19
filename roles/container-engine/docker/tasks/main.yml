@@ -161,7 +161,7 @@
   with_items: "{{ docker_package_info.pkgs }}"
   notify: restart docker
   when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "ClearLinux"] or is_atomic) and (docker_package_info.pkgs|length > 0)
-  ignore_errors: true
+  ignore_errors: yes
 
 - name: Ensure docker packages are installed
   action: "{{ docker_package_info.pkg_mgr }}"
@@ -174,7 +174,7 @@
   retries: 4
   delay: "{{ retry_stagger | d(3) }}"
   notify: restart docker
-  ignore_errors: true
+  ignore_errors: yes
   when: ansible_os_family in ["ClearLinux"]
 
 - name: get available packages on Ubuntu
