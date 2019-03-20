@@ -2,9 +2,9 @@
 - name: List ubuntu_packages
   set_fact:
     ubuntu_packages:
-      - python
-      - python-apt
-      - python-pip
+      - python3
+      - python3-apt
+      - python3-pip
       - dbus
 
 - name: Check if bootstrap is needed
