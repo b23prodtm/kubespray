@@ -1,10 +1,18 @@
 ---
 - include_tasks: download_prep.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when:
     - not skip_downloads|default(false)
 
 - name: "Download items"
   include_tasks: "download_{% if download.container %}container{% else %}file{% endif %}.yml"
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   vars:
     download: "{{ download_defaults | combine(item.value) }}"
   with_dict: "{{ downloads }}"
@@ -26,6 +34,10 @@
     - group_names | intersect(download.groups) | length
 
 - include_tasks: kubeadm_images.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when:
     - kube_version is version('v1.11.0', '>=')
     - not skip_downloads|default(false)

@@ -156,7 +156,7 @@
   when:
     - kube_proxy_remove
   # `kube-proxy --cleanup`, being Ok as per shown WARNING, still returns 255 from above run (?)
-  ignore_errors: true
+  ignore_errors: yes
   tags:
     - kube-proxy
 

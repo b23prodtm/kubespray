@@ -2,7 +2,7 @@
 - name: Configure | Check if etcd cluster is healthy
   shell: "{{ bin_dir }}/etcdctl --endpoints={{ etcd_access_addresses }} cluster-health | grep -q 'cluster is healthy'"
   register: etcd_cluster_is_healthy
-  ignore_errors: true
+  ignore_errors: yes
   changed_when: false
   check_mode: no
   when: is_etcd_master and etcd_cluster_setup
@@ -16,7 +16,7 @@
 - name: Configure | Check if etcd-events cluster is healthy
   shell: "{{ bin_dir }}/etcdctl --endpoints={{ etcd_events_access_addresses }} cluster-health | grep -q 'cluster is healthy'"
   register: etcd_events_cluster_is_healthy
-  ignore_errors: true
+  ignore_errors: yes
   changed_when: false
   check_mode: no
   when: is_etcd_master and etcd_events_cluster_setup
@@ -99,7 +99,7 @@
 - name: Configure | Check if member is in etcd cluster
   shell: "{{ bin_dir }}/etcdctl --no-sync --endpoints={{ etcd_access_addresses }} member list | grep -q {{ etcd_access_address }}"
   register: etcd_member_in_cluster
-  ignore_errors: true
+  ignore_errors: yes
   changed_when: false
   check_mode: no
   when: is_etcd_master and etcd_cluster_setup
@@ -113,7 +113,7 @@
 - name: Configure | Check if member is in etcd-events cluster
   shell: "{{ bin_dir }}/etcdctl --no-sync --endpoints={{ etcd_events_access_addresses }} member list | grep -q {{ etcd_access_address }}"
   register: etcd_events_member_in_cluster
-  ignore_errors: true
+  ignore_errors: yes
   changed_when: false
   check_mode: no
   when: is_etcd_master and etcd_events_cluster_setup

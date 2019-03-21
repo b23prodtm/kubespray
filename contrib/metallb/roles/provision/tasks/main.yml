@@ -1,6 +1,6 @@
 ---
 - name: "Kubernetes Apps | Lay Down MetalLB"
-  become: true
+  become: yes
   template: { src: "{{ item }}.j2", dest: "{{ kube_config_dir }}/{{ item }}" }
   with_items: ["metallb.yml", "metallb-config.yml"]
   register: "rendering"
