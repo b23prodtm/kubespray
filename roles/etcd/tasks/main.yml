@@ -3,6 +3,7 @@
     architecture_groups:
       x86_64: amd64
       aarch64: arm64
+      armv7l: arm
 
 - name: ansible_architecture_rename
   set_fact:
@@ -14,22 +15,36 @@
       {% endif %}
 
 - include_tasks: check_certs.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when: cert_management == "script"
   tags:
     - etcd-secrets
     - facts
 
 - include_tasks: "gen_certs_script.yml"
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when:
     - cert_management |d('script') == "script"
   tags:
     - etcd-secrets
 
 - include_tasks: upd_ca_trust.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   tags:
     - etcd-secrets
 
 - name: "Gen_certs | Get etcd certificate serials"
+  become: yes
+  ignore_errors: yes
   command: "openssl x509 -in {{ etcd_cert_dir }}/node-{{ inventory_hostname }}.pem -noout -serial"
   register: "etcd_client_cert_serial_result"
   changed_when: false
@@ -40,6 +55,8 @@
     - network
 
 - name: Set etcd_client_cert_serial
+  become: yes
+  ignore_errors: yes
   set_fact:
     etcd_client_cert_serial: "{{ etcd_client_cert_serial_result.stdout.split('=')[1] }}"
   when:
@@ -49,17 +66,31 @@
     - network
 
 - include_tasks: "install_{{ etcd_deployment_type }}.yml"
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when: is_etcd_master
   tags:
     - upgrade
 
 - include_tasks: configure.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when: is_etcd_master
 
 - include_tasks: refresh_config.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when: is_etcd_master
 
 - name: Restart etcd if certs changed
+  become: yes
+  ignore_errors: yes
   service:
     name: etcd
     state: restarted
@@ -67,6 +98,8 @@
   when: is_etcd_master and etcd_cluster_setup and etcd_secret_changed|default(false)
 
 - name: Restart etcd-events if certs changed
+  become: yes
+  ignore_errors: yes
   service:
     name: etcd-events
     state: restarted
@@ -77,4 +110,8 @@
 # initial state of the cluster is in `existing`
 # state instead of `new`.
 - include_tasks: refresh_config.yml
+  args:
+    apply:
+      become: yes
+      ignore_errors: yes
   when: is_etcd_master
