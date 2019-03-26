@@ -7,7 +7,7 @@ variable "packet_project_id" {
 }
 
 variable "operating_system" {
-  default = "ubuntu_16_04"
+  default = "ubuntu_18.04"
 }
 
 variable "public_key_path" {

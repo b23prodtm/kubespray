@@ -13,7 +13,7 @@ The playbook has two roles:
   system packages installed, and some utils (swapoff, lsattr)
   symlinked to /bin/true to ease mimicking a real node.
 
-This playbook has been test with Ubuntu 16.04 as host and ubuntu:16.04
+This playbook has been test with Ubuntu 18.04 as host and ubuntu:18.04
 as docker images (note that dind-cluster has specific customization
 for these images).
 

@@ -66,13 +66,13 @@ data "aws_ami" "distro" {
   owners = ["379101102735"]
 }
 
-- Ubuntu 16.04, replace 'data "aws_ami" "distro"' in variables.tf with
+- Ubuntu 18.04, replace 'data "aws_ami" "distro"' in variables.tf with
 data "aws_ami" "distro" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-*"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-18.04-amd64-*"]
   }
 
   filter {

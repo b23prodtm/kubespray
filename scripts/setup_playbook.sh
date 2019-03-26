@@ -31,6 +31,15 @@ function setup_firewall() {
       break;;
   esac; shift; done
 }
+inventory='inventory/mycluster/hosts.ini'
+defaults='-b -v --private-key=~/.ssh/id_rsa'
+options=""
+usage="Usage: $0 [-i,--inventory <inventory/path/to/hosts.ini>] <yaml> [ansible-playbook options]"
+usage2="Usage: $0 --crio-setup|--firewall-setup <user>@<master-node-ip>"
+[ "$#" -lt 1 ] && echo "
+${usage}
+${usage2}
+" && exit 0
 while [ "$#" -gt 0 ]; do case $1 in
   --crio-setup)
     shift
@@ -40,7 +49,17 @@ while [ "$#" -gt 0 ]; do case $1 in
     shift
     setup_firewall $* -i ~/.ssh/id_rsa
     exit 0;;
+  -i*|--inventory)
+    shift
+    inventory=$1;;
+  -h*|--help)
+    echo $usage
+    echo $usage2;;
+  -b*|-v*|--private-key*)
+    options="${options}${1}"
+    defaults=$options;;
   *)
-    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --private-key=~/.ssh/id_rsa $*
+    ansible-playbook -i $inventory $defaults $* && echo "Next call must be a firewall-cmd :
+    ${usage2}"
     break;;
 esac; shift; done
