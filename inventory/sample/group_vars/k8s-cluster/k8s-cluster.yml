@@ -127,7 +127,7 @@ cluster_name: cluster.local
 # Subdomains of DNS domain to be resolved via /etc/resolv.conf for hostnet pods
 ndots: 2
 # Can be dnsmasq_kubedns, kubedns, coredns, coredns_dual, manual or none
-dns_mode: coredns
+dns_mode: dnsmasq_kubedns
 # Set manual server if using a custom cluster DNS server
 #manual_dns_server: 10.x.x.x
 # Enable nodelocal dns cache
@@ -135,7 +135,7 @@ enable_nodelocaldns: False
 nodelocaldns_ip: 169.254.25.10
 
 # Can be docker_dns, host_resolvconf or none
-resolvconf_mode: docker_dns
+resolvconf_mode: host_resolvconf
 # Deploy netchecker app to verify DNS resolve as an HTTP service
 deploy_netchecker: false
 # Ip address of the kubernetes skydns service

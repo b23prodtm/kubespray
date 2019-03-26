@@ -86,7 +86,7 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     # or you can use the extended version as well
     # scripts/setup_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
 
-See [docs](./docs/ansible.md)
+See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
 >Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
