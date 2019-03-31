@@ -8,7 +8,7 @@
       file:
         path: "{{item}}"
         state: directory
-      become: false
+      become: no
       loop:
         - "{{playbook_dir}}/plugins/mitogen"
         - "{{playbook_dir}}/dist"

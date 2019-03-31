@@ -19,7 +19,7 @@
   when: need_bootstrap.rc != 0
 
 - set_fact:
-    ansible_python_interpreter: "{{ bin_dir }}/python"
+    ansible_python_interpreter: "{{ bin_dir }}/python3"
   tags:
     - facts
 

@@ -1,6 +1,6 @@
 ---
 - hosts: all
-  become: true
+  become: yes
   gather_facts: no
 
   vars:
@@ -132,7 +132,7 @@
         dest: "{{ dir|default('.') }}/logs.tar.gz"
         remove: true
       delegate_to: localhost
-      become: false
+      become: no
       run_once: true
 
     - name: Clean up collected command outputs

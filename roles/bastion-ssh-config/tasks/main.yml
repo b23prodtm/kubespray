@@ -9,7 +9,7 @@
     real_user: "{{ ansible_user }}"
 
 - name: create ssh bastion conf
-  become: false
+  become: no
   delegate_to: localhost
   template:
     src: ssh-bastion.conf
