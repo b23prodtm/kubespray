@@ -98,7 +98,7 @@ kube_apiserver_insecure_port: 0 # (disabled)
 
 # Kube-proxy proxyMode configuration.
 # Can be ipvs, iptables
-kube_proxy_mode: ipvs
+kube_proxy_mode: iptables
 
 # A string slice of values which specify the addresses to use for NodePorts.
 # Values may be valid IP blocks (e.g. 1.2.3.0/24, 1.2.3.4/32).
@@ -127,8 +127,7 @@ cluster_name: cluster.local
 # Subdomains of DNS domain to be resolved via /etc/resolv.conf for hostnet pods
 ndots: 2
 # Can be dnsmasq_kubedns, kubedns, coredns, coredns_dual, manual or none
-# Note: dnsmasq_kubedns requires 2Gi  ansible_memtotal_mb
-dns_mode: kubedns
+dns_mode: coredns
 # Set manual server if using a custom cluster DNS server
 #manual_dns_server: 10.x.x.x
 # Enable nodelocal dns cache

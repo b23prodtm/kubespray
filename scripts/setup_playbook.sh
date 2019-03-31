@@ -16,7 +16,7 @@ function setup_firewall() {
       sudo firewall-cmd --permanent --add-port=10250/tcp;
       sudo firewall-cmd --permanent --add-port=10255/tcp;
       sudo firewall-cmd --permanent --add-port=6783/tcp;
-      sudo firewall-cmd —reload' $* || echo "Usage: $0 --firewall-setup -n user@host"
+      sudo firewall-cmd --reload' $* || echo "Usage: $0 --firewall-setup -n user@host"
       break;;
     *)
       ssh $* 'sudo apt install firewalld;
@@ -27,7 +27,7 @@ function setup_firewall() {
       sudo firewall-cmd --permanent --add-port=10251/tcp;
       sudo firewall-cmd --permanent --add-port=10252/tcp;
       sudo firewall-cmd --permanent --add-port=10255/tcp;
-      sudo firewall-cmd —reload' || echo "Usage: $0 --firewall-setup user@host"
+      sudo firewall-cmd --reload' || echo "Usage: $0 --firewall-setup user@host"
       break;;
   esac; shift; done
 }
