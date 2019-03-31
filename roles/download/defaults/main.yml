@@ -35,7 +35,7 @@ download_delegate: "{% if download_localhost %}localhost{% else %}{{groups['kube
 image_arch: "{{host_architecture | default('amd64')}}"
 
 # Versions
-kube_version: v1.13.4
+kube_version: v1.13.5
 kubeadm_version: "{{ kube_version }}"
 # Only compatible version with Pi3
 etcd_version: v3.3.12
@@ -98,6 +98,7 @@ hyperkube_checksums:
     v1.13.2: a981aa0950e86a4380526a3a53f465ce013b95f6d9d8139a9df4a6406b67316f
     v1.13.3: 4051e88174fedc0ea643466081ca461d9d175f714594dbe5208559fed0c4ae49
   arm64:
+    v1.13.5: 8ffd84ba0cb6382a0ff96000458db8a83c92cac09458defe8496f0f0e155a6a8 #arm64
     v1.13.4: b9e909e388634d103fe5376aafa313bed5e69293383b0c740de4fe8e18d42d12 #arm64
     v1.13.3: 588037923b7f4090f5f7a3de23ea49a10345295f0b39bd0c1ebdaa24eaa76731 #arm64
     v1.13.2: 7f2c2b0c6dcc81102a89fa41957db214416fc8a0cfae664fc0e150a7d3ad337b #arm64
@@ -127,6 +128,7 @@ hyperkube_checksums:
     v1.10.0-alpha.1: 3915e3dad36db8c6dcfd66331fd6e6f41d5a1f795bed5f02e78cd64b4cf4f77d #arm64
     v1.10.0: 79291c36a8f6ca1350bf6f2344922cbe0b366cd5b376abb83eb207baaf57d379 #arm64
   amd64:
+    v1.13.5: 1a8a357ebfeab8ec62d0c6f11b59df1a93d6711c3a16e1501da32b55c144c73a
     v1.13.4: 6f2d755a350efec8b3b29e0ddf8362f60475cc10d42dea37f8f2159f7776867b
     v1.13.3: b238c772b5e4b9deed0cdc695fe86324660d037b38c6d6d7eeae7d7a657840c7
     v1.13.2: f159b587ec80ad03bf3b9bb09de5d64b773d01b0e34f2a4f1c816879c56aae6d
@@ -172,6 +174,7 @@ kubeadm_checksums:
     v1.13.2: 5bf5d766050245abde802fdea77a85586ce1477e538bcc4fa618bba854c18980
     v1.13.3: 77afb511c895bc6fb0d2ee3198a0c15d89c0f19bf91fb1fb6274634e3e147d4a
   arm64:
+    v1.13.5: 59a1995c171e5c1e74f5d02657eb2c155706f2d159ec1847b64dc866228c40d2 #arm64
     v1.13.4: 4de71d4cfa4dc64127148d48f3a1a1fa7ea24cf0c4fa42957459d0e7f9c03799 #arm64
     v1.13.3: bef1cbc2d199d32a1a31e70b864dc539b24e3c1cb87b50a1295cf03bec4832b0 #arm64
     v1.13.2: 08279a3bfeff8c4f6768d6fd92ceff8276a555f9e81bf9d541112fc8eb29963e #arm64
@@ -201,6 +204,7 @@ kubeadm_checksums:
     v1.10.0-alpha.1: 63480533cf7e8c7a2c2b221a607bdba4f0ab9590c66ba28d073fb3fe06c92706 #arm64
     v1.10.0: 19ebef6450421ace7c4a0703360a7aeba1840a1596a699828e69444cae4ccf4f #arm64
   amd64:
+    v1.13.5: 274bf887039a9993e30f96047a4a474c39e8471c4094acb75aea6beed793f079
     v1.13.4: c4300d1f3ebccad48c8e267e45a736c7d227b0e45ef36582fa8dcfe2ef7b1b10
     v1.13.3: ab767ea53e45aceba628977ef6c8c62eace72d6d232efeaf35ac50cbea5f3739
     v1.13.2: 7cb0ce57c1e6e2d85e05de3780a2f35a191fe93f89cfc5816b424efcf39834b9
