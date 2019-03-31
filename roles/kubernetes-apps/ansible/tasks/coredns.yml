@@ -1,5 +1,6 @@
 ---
 - name: Kubernetes Apps | Lay Down CoreDNS Template
+  ignore_errors: yes
   action: "{{ item.module }}"
   args:
     src: "{{ item.file }}{% if item.module == 'template' %}.j2{% endif %}"
@@ -25,6 +26,7 @@
     - coredns
 
 - name: Kubernetes Apps | Lay Down Secondary CoreDNS Template
+  ignore_errors: yes
   template:
     src: "{{ item.src }}.j2"
     dest: "{{ kube_config_dir }}/{{ item.file }}"

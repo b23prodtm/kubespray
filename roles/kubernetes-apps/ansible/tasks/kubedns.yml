@@ -1,6 +1,7 @@
 ---
 
 - name: Kubernetes Apps | Lay Down KubeDNS Template
+  ignore_errors: yes
   template:
     src: "{{ item.file }}.j2"
     dest: "{{ kube_config_dir }}/{{ item.file }}"

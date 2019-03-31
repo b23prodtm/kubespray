@@ -56,10 +56,9 @@ while [ "$#" -gt 0 ]; do case $1 in
     echo $usage
     echo $usage2;;
   -b*|-v*|--private-key*)
-    options="${options}${1}"
-    defaults=$options;;
-  *)
-    ansible-playbook -i $inventory $defaults $* && echo "Next call must be a firewall-cmd :
-    ${usage2}"
-    break;;
+    options="${options} $1"
+    defaults="";;
+  *) options="${options} $1";;
 esac; shift; done
+ansible-playbook -i $inventory $defaults $options && echo "Next call must be a firewall-cmd :
+${usage2}"

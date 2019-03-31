@@ -86,7 +86,7 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     # or you can use the extended version as well
     # scripts/setup_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
 
-See [docs](./docs/ansible.md)
+See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
 >Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
@@ -161,7 +161,13 @@ The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot
 - E: Unable to locate package unzip
 - ERROR: Service 'app' failed to build
 > The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
-Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4.
+Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
+
+- How much memory is left free on my master host ?
+If you don't know how much memory is available for the master host kubernetes-apps, run the following command that displays live memory usage : 
+
+      ssh $PI@$pi top
+      # Ctrl-C to stop monitoring
 
 ### Vagrant
 
