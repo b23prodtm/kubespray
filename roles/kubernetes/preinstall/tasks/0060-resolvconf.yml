@@ -4,6 +4,7 @@
   when: ansible_os_family in ["CoreOS", "Container Linux by CoreOS"]
 
 - name: Add domain/search/nameservers/options to resolv.conf
+  become: yes
   blockinfile:
     path: "{{resolvconffile}}"
     block: |-

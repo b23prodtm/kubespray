@@ -24,7 +24,7 @@ To deploy the cluster you can use :
 
 #### Ansible version
 
-Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansible/issues/46600](https://github.com/ansible/ansible/issues/46600)
+Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansible/issues/46600](https://github.com/ansible/ansible/issues/46600)
 
 #### Usage
 
@@ -81,13 +81,14 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
     cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 
     # Shortcut to actually set up the playbook on hosts:
-    scripts/setup_playbook.sh
+    scripts/setup_playbook.sh cluster.yml
+    # Displays help scripts/setup_playbook.sh --help
     # or you can use the extended version as well
-    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --private-key=~/.ssh/id_rsa  
+    # scripts/setup_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
 
-See [docs](./docs/ansible.md)
+See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
->Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
+>Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
 ```
 ERROR! no action detected in task. This often indicates a misspelled module name, or incorrect module path.
@@ -149,13 +150,18 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-use
         "msg": "Assertion failed"
     }
 
-The host *ip* set in ```inventory/<mycluster>/hosts.ini``` is not the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that is attributed to the docker0 iface. E.g. _172.17.0.1_
+The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
 
 - Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
 
-The file located at /etc/ssl/etcd is owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
+The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
 
       ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
+
+- E: Unable to locate package unzip
+- ERROR: Service 'app' failed to build
+> The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
+Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4.
 
 ### Vagrant
 
@@ -201,8 +207,8 @@ Supported Linux Distributions
 -----------------------------
 
 -   **Container Linux by CoreOS**
--   **Debian** Buster, Jessie, Stretch, Wheezy
--   **Ubuntu** 16.04, 18.04
+-   **Debian** Buster, Jessie, Stretch, Wheezy, Bionic
+-   **Ubuntu** 16.04, 18.04 (Raspberries)
 -   **CentOS/RHEL** 7
 -   **Fedora** 28
 -   **Fedora/CentOS** Atomic
@@ -237,23 +243,23 @@ Supported Components
 
 Note: The list of validated [docker versions](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md) was updated to 1.11.1, 1.12.1, 1.13.1, 17.03, 17.06, 17.09, 18.06. kubeadm now properly recognizes Docker 18.09.0 and newer, but still treats 18.06 as the default supported version. The kubelet might break on docker's non-standard version numbering (it no longer uses semantic versioning). To ensure auto-updates don't break your cluster look into e.g. yum versionlock plugin or apt pin).
 
-Note 2: rkt support as docker alternative is limited to control plane (etcd and
-kubelet). Docker is still used for Kubernetes cluster workloads and network
+Note 2: rkt support as docker alternative's limited to control plane (etcd and
+kubelet). Docker's still used for Kubernetes cluster workloads and network
 plugins' related OS services. Also note, only one of the supported network
 plugins can be deployed for a given single cluster.
 
 Requirements
 ------------
 
--   **Ansible v2.6 (or newer) and python-netaddr is installed on the machine
+-   **Ansible v2.6 (or newer) and python-netaddr's installed on the machine
     that will run Ansible commands**
--   **Jinja 2.9 (or newer) is required to run the Ansible Playbooks**
--   The target servers must have **access to the Internet** in order to pull docker images. Otherwise, additional configuration is required (See [Offline Environment](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/downloads.md#offline-environment))
+-   **Jinja 2.9 (or newer)'s required to run the Ansible Playbooks**
+-   The target servers must have **access to the Internet** in order to pull docker images. Otherwise, additional configuration's required (See [Offline Environment](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/downloads.md#offline-environment))
 -   The target servers are configured to allow **IPv4 forwarding**.
 -   **Your ssh key must be copied** to all the servers part of your inventory.
 -   The **firewalls are not managed**, you'll need to implement your own rules the way you used to.
     in order to avoid any issue during deployment you should disable your firewall.
--   If kubespray is ran from non-root user account, correct privilege escalation method
+-   If kubespray's ran from non-root user account, correct privilege escalation method
     should be configured in the target servers. Then the `ansible_become` flag
     or command parameters `--become or -b` should be specified.
 
@@ -278,20 +284,20 @@ You can choose between 6 network plugins. (default: `calico`, except Vagrant use
 
 -   [cilium](http://docs.cilium.io/en/latest/): layer 3/4 networking (as well as layer 7 to protect and secure application protocols), supports dynamic insertion of BPF bytecode into the Linux kernel to implement security services, networking and visibility logic.
 
--   [contiv](docs/contiv.md): supports vlan, vxlan, bgp and Cisco SDN networking. This plugin is able to
+-   [contiv](docs/contiv.md): supports vlan, vxlan, bgp and Cisco SDN networking. This plugin's able to
     apply firewall policies, segregate containers in multiple network and bridging pods onto physical networks.
 
--   [weave](docs/weave.md): Weave is a lightweight container overlay network that doesn't require an external K/V database cluster.
+-   [weave](docs/weave.md): Weave's a lightweight container overlay network that doesn't require an external K/V database cluster.
     (Please refer to `weave` [troubleshooting documentation](http://docs.weave.works/weave/latest_release/troubleshooting.html)).
 
--   [kube-router](docs/kube-router.md): Kube-router is a L3 CNI for Kubernetes networking aiming to provide operational
+-   [kube-router](docs/kube-router.md): Kube-router's a L3 CNI for Kubernetes networking aiming to provide operational
     simplicity and high performance: it uses IPVS to provide Kube Services Proxy (if setup to replace kube-proxy),
     iptables for network policies, and BGP for ods L3 networking (with optionally BGP peering with out-of-cluster BGP peers).
     It can also optionally advertise routes to Kubernetes cluster Pods CIDRs, ClusterIPs, ExternalIPs and LoadBalancerIPs.
 
--   [multus](docs/multus.md): Multus is a meta CNI plugin that provides multiple network interface support to pods. For each interface Multus delegates CNI calls to secondary CNI plugins such as Calico, macvlan, etc.
+-   [multus](docs/multus.md): Multus's a meta CNI plugin that provides multiple network interface support to pods. For each interface Multus delegates CNI calls to secondary CNI plugins such as Calico, macvlan, etc.
 
-The choice is defined with the variable `kube_network_plugin`. There is also an
+The choice's defined with the variable `kube_network_plugin`. There's also an
 option to leverage built-in cloud provider networking instead.
 See also [Network checker](docs/netcheck.md).
 

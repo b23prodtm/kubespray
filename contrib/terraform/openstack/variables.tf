@@ -60,7 +60,7 @@ variable "image" {
 
 variable "image_gfs" {
   description = "Glance image to use for GlusterFS"
-  default     = "ubuntu-16.04"
+  default     = "ubuntu-18.04"
 }
 
 variable "ssh_user" {

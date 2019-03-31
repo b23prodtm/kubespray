@@ -58,7 +58,7 @@ and after `vagrant up` or `vagrant reload`, your host will have port forwarding 
 Use alternative OS for Vagrant
 ==============================
 
-By default, Vagrant uses Ubuntu 16.04 box to provision a local cluster. You may use an alternative supported
+By default, Vagrant uses Ubuntu 18.04 box to provision a local cluster. You may use an alternative supported
 operating system for your local cluster.
 
 Customize `$os` variable in `Vagrantfile` or as override, e.g.,:
