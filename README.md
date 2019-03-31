@@ -17,7 +17,7 @@ Quick Start
 To deploy the cluster you can use :
 
 ### Ansible with Raspberry Pis cluster
-~~Raspian 9 (arm, armv7l)'s installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries, [Download and flash the classic Server for ARM64](https://wiki.ubuntu.com/ARM/RaspberryPi). Also for Raspberry see current Pull Requests:
+~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries, [Download and flash the classic Server for ARM64](https://wiki.ubuntu.com/ARM/RaspberryPi). Also for Raspberry see current Pull Requests:
 
 - [ARM](https://github.com/kubernetes-sigs/kubespray/pull/4261)
 - [ARM64](https://github.com/kubernetes-sigs/kubespray/pull/4171)
@@ -37,7 +37,7 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
 
-    # Update Ansible inventory file with inventory builder . Single master IP's possible, see nodes with bastion
+    # Update Ansible inventory file with inventory builder . Single master IP is possible, see nodes with bastion
     declare -a IPS=(192.168.0.16 192.168.0.17)
     CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
     cat inventory/mycluster/hosts.ini
@@ -53,9 +53,9 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     for ip in ${IPS[@]}; do
       ssh $PI@$ip sudo bash -c "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config";
       ssh $PI@$ip cat /etc/ssh/sshd_config | grep PermitRootLogin;
-     # To install etcd on nodes, Go lang's needed
+     # To install etcd on nodes, Go lang is needed
       ssh $PI@$ip sudo apt-get install golang -y;
-     # Ansible's reported as a trusted repository
+     # Ansible is reported as a trusted repository
       ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
      # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
 
@@ -95,7 +95,7 @@ ERROR! no action detected in task. This often indicates a misspelled module name
 ```
 probably pointing on a task depending on a module present in requirements.txt (i.e. "unseal vault").
 
-One way of solving this would be to uninstall the Ansible package and then, to install it via pip3 but it isn't always possible.
+One way of solving this would be to uninstall the Ansible package and then, to install it via pip3 but it is not always possible.
 A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip3 packages installation location, which can be found in the Location field of the output of `pip3 show [package]` before executing `ansible-playbook`.
 
 #### Known issues :
@@ -134,7 +134,7 @@ The ansible_user or --become_user must gain root privileges without password pro
 
 - When you see the Error : no PUBKEY ... could be received from GPG Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
 
-- Deploy Kubespray with Ansible Playbook to raspberrypi The option -b's required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
+- Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
 
 ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
 
@@ -219,6 +219,7 @@ Supported Linux Distributions
 -   **Fedora** 28
 -   **Fedora/CentOS** Atomic
 -   **openSUSE** Leap 42.3/Tumbleweed
+• Ubuntu 16.04, 18.04 (Raspberries)
 
 Note: Upstart/SysV init based OS types are not supported.
 
@@ -226,7 +227,7 @@ Supported Components
 --------------------
 
 -   Core
-    -   [kubernetes](https://github.com/kubernetes/kubernetes) v1.13.4
+    -   [kubernetes](https://github.com/kubernetes/kubernetes) v1.13.5
     -   [etcd](https://github.com/coreos/etcd) v3.2.24
     -   [docker](https://www.docker.com/) v18.06 (see note)
     -   [rkt](https://github.com/rkt/rkt) v1.21.0 (see Note 2)
