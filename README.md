@@ -125,13 +125,7 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
     sed "$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/" /boot/firmware/cmdline.txt | sudo tee /boot/firmware/cmdline.txt
     reboot
 
-I see the msg: "Timed out (12s) waiting for privileges escalation"
-
-The ansible_user or --become_user must gain root privileges without password prompt. That's simply to edit the sudoers and add NOPASSWD: ALL to %admin and %sudo user group. E.g. from ansible host shell :
-
-    ssh <ansible_user>@<bastion-ip> 'sudo visudo; sudo reboot'
-
-- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There's [some issue](kubernetes-sigs/kubespray#4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There's [some issue](http://github.com/kubernetes-sigs/kubespray/issues/4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
 
 - Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
 
@@ -173,9 +167,8 @@ If you don't know how much memory's available for the master host kubernetes-app
       # Ctrl-C to stop monitoring
 
 - Timeout (12s) waiting for privilege escalation prompt
-There's a problem with the remote shell configuration, try to reboot the remote host, wait for 30 seconds and retry the command which you started before.
-
-      ssh $PI@$pi sudo reboot
+Try increasing the timeout settings, you may want to run ansible with
+      ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
 
 If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
 

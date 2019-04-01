@@ -1,5 +1,6 @@
 ---
 - name: Fetch /etc/os-release
+  become: yes
   raw: cat /etc/os-release
   register: os_release
   changed_when: false

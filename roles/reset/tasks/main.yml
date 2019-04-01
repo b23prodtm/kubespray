@@ -8,6 +8,7 @@
     - network
 
 - name: reset | stop services
+  become: yes
   service:
     name: "{{ item }}"
     state: stopped
