@@ -75,6 +75,9 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
 
     # The kube user which owns k8s daemons must be added to Ubuntu group.
       ssh $PI@$pi sudo usermod -a -G ubuntu kube;
+
+    # disable firewall for the setup
+      ssh $PI@$pi sudo ufw disable;
     done
 
     # Adjust the ansible_memtotal_mb to your Raspberry specs
@@ -128,7 +131,7 @@ The ansible_user or --become_user must gain root privileges without password pro
 
     ssh <ansible_user>@<bastion-ip> 'sudo visudo; sudo reboot'
 
-- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There's [some issue](kubernetes-sigs/kubespray#4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
 
 - Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
 
@@ -164,10 +167,21 @@ The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot
 Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
 
 - How much memory is left free on my master host ?
-If you don't know how much memory is available for the master host kubernetes-apps, run the following command that displays live memory usage : 
+If you don't know how much memory's available for the master host kubernetes-apps, run the following command that displays live memory usage :
 
       ssh $PI@$pi top
       # Ctrl-C to stop monitoring
+
+- Timeout (12s) waiting for privilege escalation prompt
+There's a problem with the remote shell configuration, try to reboot the remote host, wait for 30 seconds and retry the command which you started before.
+
+      ssh $PI@$pi sudo reboot
+
+If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
+
+- How to open firewall ports for <master-node-ip> ?
+
+      ./scripts/setup_playbook.sh --firewall-setup $PI@<master-node-ip>
 
 ### Vagrant
 

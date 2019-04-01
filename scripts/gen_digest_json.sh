@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-declare -a def_list=(v1.10.0-alpha.1 v1.10.0 v1.10.1 v1.10.11 v1.10.2 v1.10.3 v1.10.4 v1.10.5 v1.10.6 v1.10.7 v1.10.8 v1.11.0 v1.11.1 v1.11.2 v1.11.3 v1.11.5 v1.12.0 v1.12.1 v1.12.2 v1.12.3 v1.12.4 v1.12.5 v1.12.6 v1.13.0 v1.13.1 v1.13.2 v1.13.3 v1.13.4)
+declare -a def_list=(v1.11.0 v1.11.1 v1.11.2 v1.11.3 v1.11.5 v1.12.0 v1.12.1 v1.12.2 v1.12.3 v1.12.4 v1.12.5 v1.12.6 v1.13.0 v1.13.1 v1.13.2 v1.13.3 v1.13.4 v1.13.5)
+declare -a etcd_def_list=(v3.3.12)
+declare -a cni_def_list=(v0.6.0)
 image=$1
 image_arch=$2
 [[ "$#" -lt 2 ]] && echo 'Usage: $0 --etcd|--cni|kubeadm|hyperkube <image_arch>
@@ -19,7 +21,7 @@ while [ "$#" -gt 0 ]; do case "$1" in
       shift; shift
       version_list=$(sort_list ${@})
     else
-      version_list=$(sort_list ${def_list[@]})
+      version_list=$(sort_list ${etcd_def_list[@]})
     fi
     printf "%s_binary_checksums:\n" "${image}"
     for etcd_version in ${version_list[@]}; do
@@ -35,7 +37,7 @@ while [ "$#" -gt 0 ]; do case "$1" in
       shift; shift
       version_list=$(sort_list ${@})
     else
-      version_list=$(sort_list ${def_list[@]})
+      version_list=$(sort_list ${cni_def_list[@]})
     fi
     printf "%s_binary_checksums:\n" "${image}"
     for cni_version in ${version_list[@]}; do
@@ -52,13 +54,12 @@ while [ "$#" -gt 0 ]; do case "$1" in
     else
       version_list=$(sort_list ${def_list[@]})
     fi
-    version_list=$(sort_list ${version_list[@]})
     printf "%s_checksums:\n" "${image}"
     printf "  %s:\n"  "${image_arch}"
     for kube_version in ${version_list[@]}; do
       tmpfile="/tmp/${image}-${kube_version}"
       curl -sSL https://storage.googleapis.com/kubernetes-release/release/${kube_version}/bin/linux/${image_arch}/${image} > $tmpfile
-      printf " %s\n" "$(print_checksums $tmpfile $kube_version $image_arch)"
+      printf "  %s\n" "$(print_checksums $tmpfile $kube_version $image_arch)"
       rm $tmpfile
     done
     break;;
