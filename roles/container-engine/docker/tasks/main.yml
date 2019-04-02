@@ -164,6 +164,7 @@
   ignore_errors: yes
 
 - name: Ensure docker packages are installed
+  become: yes
   action: "{{ docker_package_info.pkg_mgr }}"
   args:
     name: "{{ item.name }}"
@@ -178,6 +179,7 @@
   when: ansible_os_family in ["ClearLinux"]
 
 - name: get available packages on Ubuntu
+  become: yes
   command: apt-cache policy docker-ce
   when:
     - docker_task_result is failed

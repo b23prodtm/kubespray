@@ -146,10 +146,10 @@ dns_domain: "{{ cluster_name }}"
 
 ## Container runtime
 ## docker for docker and crio for cri-o.
-container_manager: docker
+container_manager: crio
 
 ## Settings for containerized control plane (etcd/kubelet/secrets)
-etcd_deployment_type: docker
+etcd_deployment_type: host
 kubelet_deployment_type: host
 helm_deployment_type: host
 
