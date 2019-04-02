@@ -376,10 +376,10 @@ downloads:
     file: "{{ container_manager == 'crio' }}"
     enabled: true
     version: "{{ crictl_version }}"
-    dest: "{{local_release_dir}}/crictl-{{ image_arch }}-{{ crictl_version }}-linux-{{ image_arch }}.tar.gz"
+    dest: "{{local_release_dir}}/crictl-{{ crictl_version }}-linux-{{ image_arch }}.tar.gz"
     sha256: "{{ crictl_binary_checksum }}"
     url: "{{ crictl_download_url }}"
-    unarchive: false
+    unarchive: true
     owner: "root"
     mode: "0755"
     groups:

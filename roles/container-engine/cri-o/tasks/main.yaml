@@ -70,6 +70,13 @@
   with_items: "{{ crio_repo_info.repos }}"
   when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse", "ClearLinux"] or is_atomic) and (crio_repo_info.repos|length > 0)
 
+- include_tasks: "install_host.yml"
+  args:
+    apply:
+      become: yes
+  tags:
+    - upgrade
+
 - name: Install cri-o packages
   become: yes
   package:
