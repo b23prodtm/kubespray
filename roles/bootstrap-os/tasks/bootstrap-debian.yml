@@ -61,5 +61,5 @@
     need_bootstrap.results | map(attribute='rc') | sort | last | bool
 
 - set_fact:
-    ansible_python_interpreter: "/usr/bin/python3"
+    ansible_python_interpreter: "/usr/bin/python"
   tags: facts

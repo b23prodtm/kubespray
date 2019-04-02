@@ -28,18 +28,18 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
 
 #### Usage
 
-    # Install pip3 [from python](https://pip.readthedocs.io/en/stable/installing/)
-    sudo python3 get-pip.py
+    # Install pip [from python](https://pip.readthedocs.io/en/stable/installing/)
+    sudo python get-pip.py
 
     # Install dependencies from ``requirements.txt``
-    sudo pip3 install -r requirements.txt
+    sudo pip install -r requirements.txt
 
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
 
     # Update Ansible inventory file with inventory builder . Single master IP is possible, see nodes with bastion
     declare -a IPS=(192.168.0.16 192.168.0.17)
-    CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
+    CONFIG_FILE=inventory/mycluster/hosts.ini python contrib/inventory_builder/inventory.py ${IPS[@]}
     cat inventory/mycluster/hosts.ini
     # bastion single master looks like `raspberrypi ansible_ssh_host=192.168.0.16 ip=192.168.0.16` ansible_host=192.168.0.16  ansible_user=pi" # replace 'pi' with 'ubuntu' or any other user
     # Review and change parameters under ``inventory/mycluster/group_vars``
@@ -91,15 +91,15 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
 
 See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
->Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
+>Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
 ```
 ERROR! no action detected in task. This often indicates a misspelled module name, or incorrect module path.
 ```
 probably pointing on a task depending on a module present in requirements.txt (i.e. "unseal vault").
 
-One way of solving this would be to uninstall the Ansible package and then, to install it via pip3 but it is not always possible.
-A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip3 packages installation location, which can be found in the Location field of the output of `pip3 show [package]` before executing `ansible-playbook`.
+One way of solving this would be to uninstall the Ansible package and then, to install it via pip but it is not always possible.
+A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip packages installation location, which can be found in the Location field of the output of `pip show [package]` before executing `ansible-playbook`.
 
 #### Known issues :
 See [docs](./docs/ansible.md)
@@ -110,7 +110,7 @@ See [docs](./docs/ansible.md)
     from ruamel.yaml import YAML
 ```
 Please install inventory builder python libraries.
->  sudo pip3 install -r contrib/inventory_builder/requirements.txt
+>  sudo pip install -r contrib/inventory_builder/requirements.txt
 
 - CGROUPS_MEMORY missing to use ```kubeadm init```
 
@@ -179,14 +179,14 @@ If the error still happens, the ansible roles/ specific TASK configuration shoul
 ### Vagrant
 
 For Vagrant we need to install python dependencies for provisioning tasks.
-Check if Python3 and pip3 are installed:
+Check if python and pip are installed:
 
-    python3 -V && pip3 -V
+    python -V && pip -V
 
 If this returns the version of the software, you're good to go. If not, download and install Python from here <https://www.python.org/downloads/source/>
 Install the necessary requirements
 
-    sudo pip3 install -r requirements.txt
+    sudo pip install -r requirements.txt
     vagrant up
 
 Documents
