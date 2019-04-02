@@ -77,8 +77,7 @@ upstream_dns_servers:
 #kube_read_only_port: 10255
 
 ## Set true to download and cache container
-download_container: false
-skip_downloads: false
+#download_container: true
 
 ## Deploy container engine
 # Set false if you want to deploy container engine manually.

@@ -1,8 +1,9 @@
 function setup_crio() {
    ssh $1 '
+   sudo add-apt-repository ppa:alexlarsson/flatpak;
    sudo add-apt-repository ppa:projectatomic/ppa;
    sudo apt-get update;
-   sudo apt install cri-o-1.13;
+   sudo apt install libostree-dev cri-o-1.13 cri-o-runc;
    sudo chmod 0755 /etc/crio; sudo chown ubuntu:ubuntu -R /etc/crio;
    sudo chmod 0755 /etc/containers; sudo chown ubuntu:ubuntu -R /etc/containers;
    ' || echo "Usage: $0 --crio-setup user@host"
