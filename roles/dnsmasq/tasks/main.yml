@@ -84,11 +84,11 @@
 
 - name: Start Resources
   kube:
-    name: "{{item.item.name}}"
+    name: "{{item.name}}"
     namespace: "kube-system"
     kubectl: "{{bin_dir}}/kubectl"
-    resource: "{{item.item.type}}"
-    filename: "{{kube_config_dir}}/{{item.item.file}}"
+    resource: "{{item.type}}"
+    filename: "{{kube_config_dir}}/{{item.file}}"
     state: "latest"
   with_items: "{{ manifests.results }}"
   delegate_to: "{{ groups['kube-master'][0] }}"

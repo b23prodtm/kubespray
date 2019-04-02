@@ -97,7 +97,7 @@
 
 - name: Gen_certs | Write etcd master certs
   copy:
-    dest: "{{ item.item }}"
+    dest: "{{ item }}"
     content: "{{ item.content | b64decode }}"
     group: "{{ etcd_cert_group }}"
     owner: kube
@@ -108,7 +108,7 @@
     - sync_certs|default(false)
     - inventory_hostname != groups['etcd'][0]
   loop_control:
-    label: "{{ item.item }}"
+    label: "{{ item }}"
 
 - set_fact:
     my_etcd_node_certs: ['ca.pem',

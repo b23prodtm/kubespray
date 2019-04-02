@@ -47,11 +47,11 @@
 
 - name: Cert Manager | Apply manifests
   kube:
-    name: "{{ item.item.name }}"
+    name: "{{ item.name }}"
     namespace: "{{ cert_manager_namespace }}"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.item.type }}"
-    filename: "{{ kube_config_dir }}/addons/cert_manager/{{ item.item.file }}"
+    resource: "{{ item.type }}"
+    filename: "{{ kube_config_dir }}/addons/cert_manager/{{ item.file }}"
     state: "latest"
   with_items: "{{ cert_manager_manifests.results }}"
   when:

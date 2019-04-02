@@ -20,11 +20,11 @@
 
 - name: Helm | Apply Helm Manifests (RBAC)
   kube:
-    name: "{{item.item.name}}"
+    name: "{{item.name}}"
     namespace: "{{ tiller_namespace }}"
     kubectl: "{{bin_dir}}/kubectl"
-    resource: "{{item.item.type}}"
-    filename: "{{kube_config_dir}}/{{item.item.file}}"
+    resource: "{{item.type}}"
+    filename: "{{kube_config_dir}}/{{item.file}}"
     state: "latest"
   with_items: "{{ manifests.results }}"
   when:

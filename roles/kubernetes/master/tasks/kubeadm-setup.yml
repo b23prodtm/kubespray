@@ -134,7 +134,7 @@
 
 - name: kubeadm | write out kubeadm certs
   copy:
-    dest: "{{ item.item }}"
+    dest: "{{ item }}"
     content: "{{ item.content | b64decode }}"
     owner: root
     group: root
