@@ -96,18 +96,23 @@ A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` en
 #### Known issues :
 See [docs](./docs/ansible.md)
 
+> *PROBLEM*
 - ModuleNotFoundError: No module named 'ruamel'
 ```Traceback (most recent call last):
   File "contrib/inventory_builder/inventory.py", line 36, in <module>
     from ruamel.yaml import YAML
 ```
+> *SOLUTION*
 Please install inventory builder python libraries.
->  sudo pip install -r contrib/inventory_builder/requirements.txt
 
+    sudo pip install -r contrib/inventory_builder/requirements.txt
+
+> *PROBLEM*
 - CGROUPS_MEMORY missing to use ```kubeadm init```
 
     [ERROR SystemVerification]: missing cgroups: memory
 
+> *SOLUTION*
 The Linux kernel must be loaded with special cgroups enabled. Add the following to the kernel parameters:
 
     cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
@@ -117,18 +122,21 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
     sed "$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/" /boot/firmware/cmdline.txt | sudo tee /boot/firmware/cmdline.txt
     reboot
 
-- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There's [some issue](http://github.com/kubernetes-sigs/kubespray/issues/4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
+> *PROBLEM*
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. 
+> *POSSIBLE ANSWER*
+There's [some issue](http://github.com/kubernetes-sigs/kubespray/issues/4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
 
-- Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
-
+> *PROBLEM*
 - When you see the Error : no PUBKEY ... could be received from GPG Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
-
-- Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
+> *ANSWER*
+Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
 
 ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
 
-- ```scripts/my_playbook.sh```
-  + TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+- ```scripts/my_playbook.sh``` 
+  > *PROBLEM*
+    + TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
 
     fatal: [raspberrypi]: FAILED! => {
         "assertion": "ip in ansible_all_ipv4_addresses",
@@ -136,11 +144,12 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-use
         "evaluated_to": false,
         "msg": "Assertion failed"
     }
-
+> *ANSWER*
 The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
-
-  + fatal: "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
-  + TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty] ```**************************************************************************
+  > *PROBLEM*
+    + fatal: "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
+    + TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty]
+    **************************************************************************
 Wednesday 03 April 2019  16:07:14 +0200 (0:00:00.203)       0:00:40.395 *******
 ok: [raspberrypi] => (item=kube-master) => {
     "changed": false,
@@ -159,34 +168,42 @@ ok: [raspberrypi] => (item=etcd) => {
     "item": "etcd",
     "msg": "All assertions passed"
 }```
-
+> *ANSWER*
 The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
 
+> *PROBLEM*
 - Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
-
+> *ANSWER*
 The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
 
       ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
 
+> *PROBLEM*
 - E: Unable to locate package unzip
 - ERROR: Service 'app' failed to build
-> The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
+> *ANSWER*
+The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
 Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
 
+> *ISSUE*
 - How much memory is left free on my master host ?
+> *ANSWER*
 If you don't know how much memory's available for the master host kubernetes-apps, run the following command that displays live memory usage :
 
       ssh $PI@$pi top
       # Ctrl-C to stop monitoring
 
+> *PROBLEM*
 - Timeout (12s) waiting for privilege escalation prompt
 Try increasing the timeout settings, you may want to run ansible with
       ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
 
+> *POSSIBLE SOLUTION*
 If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
 
+> *ISSUE*
 - How to open firewall ports for <master-node-ip> ?
-
+> *ANSWER*
       ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
 
 ### Vagrant
