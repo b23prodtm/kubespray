@@ -132,79 +132,83 @@ There's [some issue](http://github.com/kubernetes-sigs/kubespray/issues/4261) to
 > *ANSWER*
 Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
 
-ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
+    ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
 
-- ```scripts/my_playbook.sh``` 
+- ```scripts/my_playbook.sh cluster.yml```
   > *PROBLEM*
     + TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
 
-    fatal: [raspberrypi]: FAILED! => {
-        "assertion": "ip in ansible_all_ipv4_addresses",
-        "changed": false,
-        "evaluated_to": false,
-        "msg": "Assertion failed"
-    }
-> *ANSWER*
-The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
+            fatal: [raspberrypi]: FAILED! => {
+                "assertion": "ip in ansible_all_ipv4_addresses",
+                "changed": false,
+                "evaluated_to": false,
+                "msg": "Assertion failed"
+            }
+            
+    > *ANSWER*
+    The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
+    
   > *PROBLEM*
     + fatal: "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
     + TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty]
-    **************************************************************************
-Wednesday 03 April 2019  16:07:14 +0200 (0:00:00.203)       0:00:40.395 *******
-ok: [raspberrypi] => (item=kube-master) => {
-    "changed": false,
-    "item": "kube-master",
-    "msg": "All assertions passed"
-}
-failed: [raspberrypi] (item=kube-node) => {
-    "assertion": "groups.get('kube-node')",
-    "changed": false,
-    "evaluated_to": false,
-    "item": "kube-node",
-    "msg": "Assertion failed"
-}
-ok: [raspberrypi] => (item=etcd) => {
-    "changed": false,
-    "item": "etcd",
-    "msg": "All assertions passed"
-}```
-> *ANSWER*
-The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
 
-> *PROBLEM*
-- Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
-> *ANSWER*
-The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
+            **************************************************************************
+            Wednesday 03 April 2019  16:07:14 +0200 (0:00:00.203)       0:00:40.395 *******
+            ok: [raspberrypi] => (item=kube-master) => {
+                "changed": false,
+                "item": "kube-master",
+                "msg": "All assertions passed"
+            }
+            failed: [raspberrypi] (item=kube-node) => {
+                "assertion": "groups.get('kube-node')",
+                "changed": false,
+                "evaluated_to": false,
+                "item": "kube-node",
+                "msg": "Assertion failed"
+            }
+            ok: [raspberrypi] => (item=etcd) => {
+                "changed": false,
+                "item": "etcd",
+                "msg": "All assertions passed"
+            }
+        
+    > *ANSWER*
+    The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
 
-      ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
+    > *PROBLEM*
+    + Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
+    > *ANSWER*
+    The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
 
-> *PROBLEM*
-- E: Unable to locate package unzip
-- ERROR: Service 'app' failed to build
-> *ANSWER*
-The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
-Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
+            ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
 
+    > *PROBLEM*
+    + E: Unable to locate package unzip
+    + ERROR: Service 'app' failed to build
+    > *ANSWER*
+    The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
+    Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
+
+    > *PROBLEM*
+    + Timeout (12s) waiting for privilege escalation prompt
+    Try increasing the timeout settings, you may want to run ansible with
+          ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
+    > *POSSIBLE SOLUTION*
+    If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
+    
 > *ISSUE*
 - How much memory is left free on my master host ?
 > *ANSWER*
 If you don't know how much memory's available for the master host kubernetes-apps, run the following command that displays live memory usage :
 
-      ssh $PI@$pi top
-      # Ctrl-C to stop monitoring
-
-> *PROBLEM*
-- Timeout (12s) waiting for privilege escalation prompt
-Try increasing the timeout settings, you may want to run ansible with
-      ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
-
-> *POSSIBLE SOLUTION*
-If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
+        ssh $PI@$pi top
+        # Ctrl-C to stop monitoring
 
 > *ISSUE*
 - How to open firewall ports for <master-node-ip> ?
 > *ANSWER*
-      ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
+
+  ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
 
 ### Vagrant
 
