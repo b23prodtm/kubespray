@@ -210,6 +210,27 @@ If you don't know how much memory's available for the master host kubernetes-app
 
         ./scripts/my_playbook.sh --firewall-setup <ansible_user>@<bastion-ip>
 
+- E: Unable to locate package unzip
+- ERROR: Service 'app' failed to build
+> The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
+Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
+
+- How much memory is left free on my master host ?
+If you don't know how much memory's available for the master host kubernetes-apps, run the following command that displays live memory usage :
+
+      ssh $PI@$pi top
+      # Ctrl-C to stop monitoring
+
+- Timeout (12s) waiting for privilege escalation prompt
+Try increasing the timeout settings, you may want to run ansible with
+      ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
+
+If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
+
+- How to open firewall ports for <master-node-ip> ?
+
+      ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
+
 ### Vagrant
 
 For Vagrant we need to install python dependencies for provisioning tasks.
