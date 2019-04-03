@@ -128,7 +128,7 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
 ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
 
 - ```scripts/my_playbook.sh```
-  +TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+  + TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
 
     fatal: [raspberrypi]: FAILED! => {
         "assertion": "ip in ansible_all_ipv4_addresses",
@@ -139,11 +139,8 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-use
 
 The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
 
-  +fatal: [raspberrypi]: FAILED! => {"changed": true, "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
-
-That's if you have specified only a single machine-ip in hosts.ini.
-
-  +TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty] **************************************************************************
+  + fatal: "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
+  + TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty] ```**************************************************************************
 Wednesday 03 April 2019  16:07:14 +0200 (0:00:00.203)       0:00:40.395 *******
 ok: [raspberrypi] => (item=kube-master) => {
     "changed": false,
@@ -161,7 +158,8 @@ ok: [raspberrypi] => (item=etcd) => {
     "changed": false,
     "item": "etcd",
     "msg": "All assertions passed"
-}
+}```
+
 The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
 
 - Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
