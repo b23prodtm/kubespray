@@ -208,7 +208,7 @@ If you don't know how much memory's available for the master host kubernetes-app
 - How to open firewall ports for <master-node-ip> ?
 > *ANSWER*
 
-  ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
+        ./scripts/my_playbook.sh --firewall-setup <ansible_user>@<bastion-ip>
 
 ### Vagrant
 
