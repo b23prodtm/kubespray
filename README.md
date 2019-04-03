@@ -187,7 +187,7 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
     + ERROR: Service 'app' failed to build
     > *ANSWER*
     The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
-    Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
+    Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a google nameserver, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A CoreDNS service must be running, see below abput the ```top``` command.
 
     > *PROBLEM*
     + Timeout (12s) waiting for privilege escalation prompt
@@ -201,7 +201,7 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
 > *ANSWER*
 If you don't know how much memory's available for the master host kubernetes-apps, run the following command that displays live memory usage :
 
-        ssh $PI@$pi top
+        ssh <ansible_user>@<bastion-ip> top
         # Ctrl-C to stop monitoring
 
 > *ISSUE*
