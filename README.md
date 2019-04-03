@@ -46,11 +46,10 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     cat inventory/mycluster/group_vars/all/all.yml
     cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
 
-    # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
     declare PI=pi # replace 'pi' with 'ubuntu' or any other user
-    for ip in ${IPS[@]}; do ssh-copy-id $PI@$ip; done
-    # Enable SSH interface and PermitRootLogin over ssh in Raspberry    
     for ip in ${IPS[@]}; do
+    # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
+      ssh-copy-id $PI@$ip;    
       ssh $PI@$ip sudo bash -c "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config";
       ssh $PI@$ip cat /etc/ssh/sshd_config | grep PermitRootLogin;
      # To install etcd on nodes, Go lang is needed
@@ -58,20 +57,6 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
      # Ansible is reported as a trusted repository
       ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
      # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
-
-     # Get docker-ce (Read Ubuntu LTS https://docs.docker.com/install/linux/docker-ce/ubuntu/)
-      ssh $PI@$pi sudo apt-get remove docker docker-engine docker.io containerd runc -y;
-     # Install packages to allow apt to use a repository over HTTPS
-      ssh $PI@$pi sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y;
-     # Add Docker’s official GPG key
-      ssh $PI@$pi curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
-     # Use the following command to set up the stable repository.
-      ssh $PI@$pi sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable";
-
-     # Install Docker Community Edition
-      ssh $PI@$pi sudo apt-get update && sudo apt-get install docker-ce -y;
-     # Install the latest version of Docker CE and containerd
-      ssh $PI@$pi sudo apt-get install docker-ce-cli containerd.io -y;
 
     # The kube user which owns k8s daemons must be added to Ubuntu group.
       ssh $PI@$pi sudo usermod -a -G ubuntu kube;
@@ -84,10 +69,17 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 
     # Shortcut to actually set up the playbook on hosts:
-    scripts/setup_playbook.sh cluster.yml
-    # Displays help scripts/setup_playbook.sh --help
+    scripts/my_playbook.sh cluster.yml
+
+    # Displays help scripts/my_playbook.sh --help
     # or you can use the extended version as well
-    # scripts/setup_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
+    # scripts/my_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
+
+    for ip in ${IPS[@]}; do
+    # --setup-firewall opens default kubernetes ports in firewalld
+      scripts/my_playbook.sh --setup-firewall $PI@$pi
+      ssh $PI@$pi sudo ufw enable;        
+    done
 
 See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
@@ -135,10 +127,8 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
 
 ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
 
-- ```scripts/setup_playbook.sh```
- command will fail with:
-
-    TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+- ```scripts/my_playbook.sh```
+  +TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
 
     fatal: [raspberrypi]: FAILED! => {
         "assertion": "ip in ansible_all_ipv4_addresses",
@@ -148,6 +138,31 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-use
     }
 
 The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
+
+  +fatal: [raspberrypi]: FAILED! => {"changed": true, "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
+
+That's if you have specified only a single machine-ip in hosts.ini.
+
+  +TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty] **************************************************************************
+Wednesday 03 April 2019  16:07:14 +0200 (0:00:00.203)       0:00:40.395 *******
+ok: [raspberrypi] => (item=kube-master) => {
+    "changed": false,
+    "item": "kube-master",
+    "msg": "All assertions passed"
+}
+failed: [raspberrypi] (item=kube-node) => {
+    "assertion": "groups.get('kube-node')",
+    "changed": false,
+    "evaluated_to": false,
+    "item": "kube-node",
+    "msg": "Assertion failed"
+}
+ok: [raspberrypi] => (item=etcd) => {
+    "changed": false,
+    "item": "etcd",
+    "msg": "All assertions passed"
+}
+The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
 
 - Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
 
@@ -174,7 +189,7 @@ If the error still happens, the ansible roles/ specific TASK configuration shoul
 
 - How to open firewall ports for <master-node-ip> ?
 
-      ./scripts/setup_playbook.sh --firewall-setup $PI@<master-node-ip>
+      ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
 
 ### Vagrant
 
