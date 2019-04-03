@@ -19,20 +19,20 @@
   when: need_bootstrap.rc != 0
 
 - set_fact:
-    ansible_python_interpreter: "{{ bin_dir }}/python3"
+    ansible_python_interpreter: "{{ bin_dir }}/python"
   tags:
     - facts
 
-- name: Install pip3
+- name: Install pip
   command: "{{ ansible_python_interpreter }} -m ensurepip"
   args:
-    creates: "{{ bin_dir }}/pypy3/bin/pip3"
+    creates: "{{ bin_dir }}/pypy3/bin/pip"
   register: pip_installed
 
-- name: Install pip3 link
+- name: Install pip link
   file:
-    src: "{{ bin_dir }}/pypy3/bin/pip3"
-    dest: "{{ bin_dir }}/pip3"
+    src: "{{ bin_dir }}/pypy3/bin/pip"
+    dest: "{{ bin_dir }}/pip"
     mode: 0755
     state: link
   when: pip_installed.changed

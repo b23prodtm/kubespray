@@ -48,11 +48,11 @@
 
 - name: Kubernetes Apps | Start Resources
   kube:
-    name: "{{ item.item.name }}"
+    name: "{{ item.name }}"
     namespace: "kube-system"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.item.type }}"
-    filename: "{{ kube_config_dir }}/{{ item.item.file }}"
+    resource: "{{ item.type }}"
+    filename: "{{ kube_config_dir }}/{{ item.file }}"
     state: "latest"
   with_items:
     - "{{ kubedns_manifests.results | default({}) }}"
@@ -73,7 +73,7 @@
     - kubedns
     - nodelocaldns
   loop_control:
-    label: "{{ item.item.file }}"
+    label: "{{ item.file }}"
 
 - name: Kubernetes Apps | Netchecker
   import_tasks: tasks/netchecker.yml

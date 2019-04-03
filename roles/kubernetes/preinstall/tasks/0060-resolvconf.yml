@@ -22,6 +22,7 @@
   notify: Preinstall | restart network
 
 - name: Remove search/domain/nameserver options before block
+  become: yes
   replace:
     dest: "{{item[0]}}"
     regexp: '^{{ item[1] }}[^#]*(?=# Ansible entries BEGIN)'
@@ -33,6 +34,7 @@
   notify: Preinstall | restart network
 
 - name: Remove search/domain/nameserver options after block
+  become: yes
   replace:
     dest: "{{item[0]}}"
     regexp: '(# Ansible entries END\n(?:(?!^{{ item[1] }}).*\n)*)(?:^{{ item[1] }}.*\n?)+'
@@ -51,6 +53,7 @@
   when: ansible_os_family in ["CoreOS", "Container Linux by CoreOS"]
 
 - name: persist resolvconf cloud init file
+  become: yes
   template:
     dest: "{{resolveconf_cloud_init_conf}}"
     src: resolvconf.j2

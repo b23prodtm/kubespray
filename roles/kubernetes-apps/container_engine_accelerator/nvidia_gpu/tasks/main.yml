@@ -42,11 +42,11 @@
 
 - name: Container Engine Acceleration Nvidia GPU | Apply manifests for nvidia accelerators
   kube:
-    name: "{{ item.item.name }}"
+    name: "{{ item.name }}"
     namespace: "kube-system"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.item.type }}"
-    filename: "{{ kube_config_dir }}/addons/container_engine_accelerator/{{ item.item.file }}"
+    resource: "{{ item.type }}"
+    filename: "{{ kube_config_dir }}/addons/container_engine_accelerator/{{ item.file }}"
     state: "latest"
   with_items:
     - "{{container_engine_accelerator_manifests.results}}"

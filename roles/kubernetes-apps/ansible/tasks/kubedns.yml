@@ -1,6 +1,7 @@
 ---
 
 - name: Kubernetes Apps | Lay Down KubeDNS Template
+  ignore_errors: yes
   action: "{{ item.module }}"
   args:
     src: "{{ item.file }}{% if item.module == 'template' %}.j2{% endif %}"

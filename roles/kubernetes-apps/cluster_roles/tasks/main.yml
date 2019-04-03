@@ -41,10 +41,10 @@
 
 - name: Kubernetes Apps | Add policies, roles, bindings for PodSecurityPolicy
   kube:
-    name: "{{item.item.name}}"
+    name: "{{item.name}}"
     kubectl: "{{bin_dir}}/kubectl"
-    resource: "{{item.item.type}}"
-    filename: "{{kube_config_dir}}/{{item.item.file}}"
+    resource: "{{item.type}}"
+    filename: "{{kube_config_dir}}/{{item.file}}"
     state: "latest"
   register: result
   until: result is succeeded
@@ -55,7 +55,7 @@
     - inventory_hostname == groups['kube-master'][0]
     - not item is skipped
   loop_control:
-    label: "{{ item.item.file }}"
+    label: "{{ item.file }}"
 
 - name: Kubernetes Apps | Add ClusterRoleBinding to admit nodes
   template:

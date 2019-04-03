@@ -28,29 +28,28 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
 
 #### Usage
 
-    # Install pip3 [from python](https://pip.readthedocs.io/en/stable/installing/)
-    sudo python3 get-pip.py
+    # Install pip [from python](https://pip.readthedocs.io/en/stable/installing/)
+    sudo python get-pip.py
 
     # Install dependencies from ``requirements.txt``
-    sudo pip3 install -r requirements.txt
+    sudo pip install -r requirements.txt
 
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
 
     # Update Ansible inventory file with inventory builder . Single master IP is possible, see nodes with bastion
     declare -a IPS=(192.168.0.16 192.168.0.17)
-    CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
+    CONFIG_FILE=inventory/mycluster/hosts.ini python contrib/inventory_builder/inventory.py ${IPS[@]}
     cat inventory/mycluster/hosts.ini
     # bastion single master looks like `raspberrypi ansible_ssh_host=192.168.0.16 ip=192.168.0.16` ansible_host=192.168.0.16  ansible_user=pi" # replace 'pi' with 'ubuntu' or any other user
     # Review and change parameters under ``inventory/mycluster/group_vars``
     cat inventory/mycluster/group_vars/all/all.yml
     cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
 
-    # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
     declare PI=pi # replace 'pi' with 'ubuntu' or any other user
-    for ip in ${IPS[@]}; do ssh-copy-id $PI@$ip; done
-    # Enable SSH interface and PermitRootLogin over ssh in Raspberry    
     for ip in ${IPS[@]}; do
+    # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
+      ssh-copy-id $PI@$ip;    
       ssh $PI@$ip sudo bash -c "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config";
       ssh $PI@$ip cat /etc/ssh/sshd_config | grep PermitRootLogin;
      # To install etcd on nodes, Go lang is needed
@@ -59,44 +58,40 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
       ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
      # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
 
-     # Get docker-ce (Read Ubuntu LTS https://docs.docker.com/install/linux/docker-ce/ubuntu/)
-      ssh $PI@$pi sudo apt-get remove docker docker-engine docker.io containerd runc -y;
-     # Install packages to allow apt to use a repository over HTTPS
-      ssh $PI@$pi sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y;
-     # Add Docker’s official GPG key
-      ssh $PI@$pi curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
-     # Use the following command to set up the stable repository.
-      ssh $PI@$pi sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable";
-
-     # Install Docker Community Edition
-      ssh $PI@$pi sudo apt-get update && sudo apt-get install docker-ce -y;
-     # Install the latest version of Docker CE and containerd
-      ssh $PI@$pi sudo apt-get install docker-ce-cli containerd.io -y;
-
     # The kube user which owns k8s daemons must be added to Ubuntu group.
       ssh $PI@$pi sudo usermod -a -G ubuntu kube;
+
+    # disable firewall for the setup
+      ssh $PI@$pi sudo ufw disable;
     done
 
     # Adjust the ansible_memtotal_mb to your Raspberry specs
     cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 
     # Shortcut to actually set up the playbook on hosts:
-    scripts/setup_playbook.sh cluster.yml
-    # Displays help scripts/setup_playbook.sh --help
+    scripts/my_playbook.sh cluster.yml
+
+    # Displays help scripts/my_playbook.sh --help
     # or you can use the extended version as well
-    # scripts/setup_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
+    # scripts/my_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
+
+    for ip in ${IPS[@]}; do
+    # --setup-firewall opens default kubernetes ports in firewalld
+      scripts/my_playbook.sh --setup-firewall $PI@$pi
+      ssh $PI@$pi sudo ufw enable;        
+    done
 
 See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
->Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
+>Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
 ```
 ERROR! no action detected in task. This often indicates a misspelled module name, or incorrect module path.
 ```
 probably pointing on a task depending on a module present in requirements.txt (i.e. "unseal vault").
 
-One way of solving this would be to uninstall the Ansible package and then, to install it via pip3 but it is not always possible.
-A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip3 packages installation location, which can be found in the Location field of the output of `pip3 show [package]` before executing `ansible-playbook`.
+One way of solving this would be to uninstall the Ansible package and then, to install it via pip but it is not always possible.
+A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip packages installation location, which can be found in the Location field of the output of `pip show [package]` before executing `ansible-playbook`.
 
 #### Known issues :
 See [docs](./docs/ansible.md)
@@ -107,7 +102,7 @@ See [docs](./docs/ansible.md)
     from ruamel.yaml import YAML
 ```
 Please install inventory builder python libraries.
->  sudo pip3 install -r contrib/inventory_builder/requirements.txt
+>  sudo pip install -r contrib/inventory_builder/requirements.txt
 
 - CGROUPS_MEMORY missing to use ```kubeadm init```
 
@@ -122,13 +117,7 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
     sed "$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/" /boot/firmware/cmdline.txt | sudo tee /boot/firmware/cmdline.txt
     reboot
 
-I see the msg: "Timed out (12s) waiting for privileges escalation"
-
-The ansible_user or --become_user must gain root privileges without password prompt. That's simply to edit the sudoers and add NOPASSWD: ALL to %admin and %sudo user group. E.g. from ansible host shell :
-
-    ssh <ansible_user>@<bastion-ip> 'sudo visudo; sudo reboot'
-
-- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There's [some issue](http://github.com/kubernetes-sigs/kubespray/issues/4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
 
 - Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
 
@@ -138,10 +127,8 @@ The ansible_user or --become_user must gain root privileges without password pro
 
 ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
 
-- ```scripts/setup_playbook.sh```
- command will fail with:
-
-    TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+- ```scripts/my_playbook.sh```
+  +TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
 
     fatal: [raspberrypi]: FAILED! => {
         "assertion": "ip in ansible_all_ipv4_addresses",
@@ -152,6 +139,31 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-use
 
 The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
 
+  +fatal: [raspberrypi]: FAILED! => {"changed": true, "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
+
+That's if you have specified only a single machine-ip in hosts.ini.
+
+  +TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty] **************************************************************************
+Wednesday 03 April 2019  16:07:14 +0200 (0:00:00.203)       0:00:40.395 *******
+ok: [raspberrypi] => (item=kube-master) => {
+    "changed": false,
+    "item": "kube-master",
+    "msg": "All assertions passed"
+}
+failed: [raspberrypi] (item=kube-node) => {
+    "assertion": "groups.get('kube-node')",
+    "changed": false,
+    "evaluated_to": false,
+    "item": "kube-node",
+    "msg": "Assertion failed"
+}
+ok: [raspberrypi] => (item=etcd) => {
+    "changed": false,
+    "item": "etcd",
+    "msg": "All assertions passed"
+}
+The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
+
 - Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
 
 The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
@@ -161,19 +173,35 @@ The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot
 - E: Unable to locate package unzip
 - ERROR: Service 'app' failed to build
 > The command ```bin/sh -c apt-get update -yqq   && apt-get install -yqq --no-install-recommends     git     zip     unzip   && rm -rf /var/lib/apt/lists' returned a non-zero code: 100```
-Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4.
+Kubernetes container manager failed to resolve package reposirory hostnames. That's related to the cluster DNS misconfiguration. Read the [DNS Stack](docs/dns-stack.md) documentation. You may opt in for a dnsmasq_kubedns dns mode, your master host must have access to the internet. Default Google DNS IPs are 8.8.8.8 and 8.8.4.4. A DNS service must be running, see below.
+
+- How much memory is left free on my master host ?
+If you don't know how much memory's available for the master host kubernetes-apps, run the following command that displays live memory usage :
+
+      ssh $PI@$pi top
+      # Ctrl-C to stop monitoring
+
+- Timeout (12s) waiting for privilege escalation prompt
+Try increasing the timeout settings, you may want to run ansible with
+      ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
+
+If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
+
+- How to open firewall ports for <master-node-ip> ?
+
+      ./scripts/my_playbook.sh --firewall-setup $PI@<master-node-ip>
 
 ### Vagrant
 
 For Vagrant we need to install python dependencies for provisioning tasks.
-Check if Python3 and pip3 are installed:
+Check if python and pip are installed:
 
-    python3 -V && pip3 -V
+    python -V && pip -V
 
 If this returns the version of the software, you're good to go. If not, download and install Python from here <https://www.python.org/downloads/source/>
 Install the necessary requirements
 
-    sudo pip3 install -r requirements.txt
+    sudo pip install -r requirements.txt
     vagrant up
 
 Documents

@@ -16,7 +16,7 @@ function setup_firewall() {
       sudo firewall-cmd --permanent --add-port=10250/tcp;
       sudo firewall-cmd --permanent --add-port=10255/tcp;
       sudo firewall-cmd --permanent --add-port=6783/tcp;
-      sudo firewall-cmd —reload' $* || echo "Usage: $0 --firewall-setup -n user@host"
+      sudo firewall-cmd --reload' $* || echo "Usage: $0 --firewall-setup -n user@host"
       break;;
     *)
       ssh $* 'sudo apt install firewalld;
@@ -27,12 +27,12 @@ function setup_firewall() {
       sudo firewall-cmd --permanent --add-port=10251/tcp;
       sudo firewall-cmd --permanent --add-port=10252/tcp;
       sudo firewall-cmd --permanent --add-port=10255/tcp;
-      sudo firewall-cmd —reload' || echo "Usage: $0 --firewall-setup user@host"
+      sudo firewall-cmd --reload' || echo "Usage: $0 --firewall-setup user@host"
       break;;
   esac; shift; done
 }
 inventory='inventory/mycluster/hosts.ini'
-defaults='-b -v --private-key=~/.ssh/id_rsa'
+defaults='-b --private-key=~/.ssh/id_rsa --ask-become-pass'
 options=""
 usage="Usage: $0 [-i,--inventory <inventory/path/to/hosts.ini>] <yaml> [ansible-playbook options]"
 usage2="Usage: $0 --crio-setup|--firewall-setup <user>@<master-node-ip>"
@@ -55,7 +55,7 @@ while [ "$#" -gt 0 ]; do case $1 in
   -h*|--help)
     echo $usage
     echo $usage2;;
-  -b*|-v*|--private-key*)
+  -b*|--private-key*)
     options="${options} $1"
     defaults="";;
   *) options="${options} $1";;
