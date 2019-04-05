@@ -52,13 +52,13 @@
 
 - name: Stop if memory is too small for masters
   assert:
-    that: ansible_memtotal_mb >= 742
+    that: ansible_memtotal_mb >= 700
   ignore_errors: "{{ ignore_assert_errors }}"
   when: inventory_hostname in groups['kube-master']
 
 - name: Stop if memory is too small for nodes
   assert:
-    that: ansible_memtotal_mb >= 463
+    that: ansible_memtotal_mb >= 400
   ignore_errors: "{{ ignore_assert_errors }}"
   when: inventory_hostname in groups['kube-node']
 
