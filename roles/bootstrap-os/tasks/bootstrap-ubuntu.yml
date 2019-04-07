@@ -2,9 +2,9 @@
 - name: List ubuntu_packages
   set_fact:
     ubuntu_packages:
-      - python
-      - python-apt
-      - python-pip
+      - python3
+      - python3-apt
+      - python3-pip
       - dbus
 
 - name: Check if bootstrap is needed
@@ -32,7 +32,7 @@
 
 - name: Add http_proxy to /etc/apt/apt.conf if http_proxy is defined
   raw: echo 'Acquire::http::proxy "{{ http_proxy }}";' >> /etc/apt/apt.conf
-  become: true
+  become: yes
   environment: {}
   when:
     - http_proxy is defined
@@ -51,7 +51,7 @@
 
 - name: Add https_proxy to /etc/apt/apt.conf if https_proxy is defined
   raw: echo 'Acquire::https::proxy "{{ https_proxy }}";' >> /etc/apt/apt.conf
-  become: true
+  become: yes
   environment: {}
   when:
     - https_proxy is defined
@@ -61,12 +61,12 @@
   raw:
     apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y {{ ubuntu_packages | join(" ") }}
-  become: true
+  become: yes
   environment: {}
   when:
     - need_bootstrap.results | map(attribute='rc') | sort | last | bool
 
 - set_fact:
-    ansible_python_interpreter: "/usr/bin/python"
+    ansible_python_interpreter: "/usr/bin/python3"
   tags:
     - facts

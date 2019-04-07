@@ -17,6 +17,7 @@
     - facts
 
 - name: Add OpenShift Origin repository
+  become: yes
   yum_repository:
     name: origin
     description: OpenShift Origin Repo
@@ -25,6 +26,8 @@
   when: ansible_distribution in ["CentOS","RedHat"] and not is_atomic
 
 - name: Make sure needed folders exist in the system
+  become: yes
+  ignore_errors: yes
   with_items:
     - /etc/crio
     - /etc/containers
@@ -33,17 +36,20 @@
     state: directory
 
 - name: Install cri-o packages
+  become: yes
   package:
     name: "{{ item }}"
     state: present
   with_items: "{{ crio_packages }}"
 
 - name: Install cri-o config
+  become: yes
   template:
     src: crio.conf.j2
     dest: /etc/crio/crio.conf
 
 - name: Copy mounts.conf
+  become: yes
   copy:
     src: mounts.conf
     dest: /etc/containers/mounts.conf
@@ -51,6 +57,8 @@
     - ansible_os_family == 'RedHat'
 
 - name: Create directory for oci hooks
+  become: yes
+  ignore_errors: yes
   file:
     path: /etc/containers/oci/hooks.d
     state: directory
@@ -58,6 +66,7 @@
     mode: 0755
 
 - name: Install cri-o service
+  become: yes
   service:
     name: "{{ crio_service }}"
     enabled: yes

@@ -1,6 +1,6 @@
 ---
 - name: "Load lvm kernel modules"
-  become: true
+  become: yes
   with_items:
     - "dm_snapshot"
     - "dm_mirror"
@@ -10,14 +10,14 @@
     state: "present"
 
 - name: "Install glusterfs mount utils (RedHat)"
-  become: true
+  become: yes
   yum:
     name: "glusterfs-fuse"
     state: "present"
   when: "ansible_os_family == 'RedHat'"
 
 - name: "Install glusterfs mount utils (Debian)"
-  become: true
+  become: yes
   apt:
     name: "glusterfs-client"
     state: "present"

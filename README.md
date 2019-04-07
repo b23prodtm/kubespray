@@ -1,7 +1,6 @@
-![Kubernetes Logo](https://raw.githubusercontent.com/kubernetes-sigs/kubespray/master/docs/img/kubernetes-logo.png)
+￼
 
 Deploy a Production Ready Kubernetes Cluster
-============================================
 
 If you have questions, check the [documentation](https://kubespray.io) and join us on the [kubernetes slack](https://kubernetes.slack.com), channel **\#kubespray**.
 You can get your invite [here](http://slack.k8s.io/)
@@ -17,7 +16,11 @@ Quick Start
 
 To deploy the cluster you can use :
 
-### Ansible
+### Ansible with Raspberry Pis cluster
+~~Raspian 9 (arm, armv7l) is installed on PIs systems.~~ Ubuntu 18.04 bionic preinstalled server for Raspberries, [Download and flash the classic Server for ARM64](https://wiki.ubuntu.com/ARM/RaspberryPi). Also for Raspberry see current Pull Requests:
+
+- [ARM](https://github.com/kubernetes-sigs/kubespray/pull/4261)
+- [ARM64](https://github.com/kubernetes-sigs/kubespray/pull/4171)
 
 #### Ansible version
 
@@ -25,47 +28,146 @@ Ansible v2.7.0 is failing and/or produce unexpected results due to [ansible/ansi
 
 #### Usage
 
+    # Install pip3 [from python](https://pip.readthedocs.io/en/stable/installing/)
+    sudo python3 get-pip.py
+
     # Install dependencies from ``requirements.txt``
-    sudo pip install -r requirements.txt
+    sudo pip3 install -r requirements.txt
 
     # Copy ``inventory/sample`` as ``inventory/mycluster``
     cp -rfp inventory/sample inventory/mycluster
 
-    # Update Ansible inventory file with inventory builder
-    declare -a IPS=(10.10.1.3 10.10.1.4 10.10.1.5)
+    # Update Ansible inventory file with inventory builder . Single master IP is possible, see nodes with bastion
+    declare -a IPS=(192.168.0.16 192.168.0.17)
     CONFIG_FILE=inventory/mycluster/hosts.ini python3 contrib/inventory_builder/inventory.py ${IPS[@]}
-
+    cat inventory/mycluster/hosts.ini
+    # bastion single master looks like `raspberrypi ansible_ssh_host=192.168.0.16 ip=192.168.0.16` ansible_host=192.168.0.16  ansible_user=pi" # replace 'pi' with 'ubuntu' or any other user
     # Review and change parameters under ``inventory/mycluster/group_vars``
     cat inventory/mycluster/group_vars/all/all.yml
     cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
 
-    # Deploy Kubespray with Ansible Playbook - run the playbook as root
-    # The option `-b` is required, as for example writing SSL keys in /etc/,
-    # installing packages and interacting with various systemd daemons.
-    # Without -b the playbook will fail to run!
-    ansible-playbook -i inventory/mycluster/hosts.ini --become --become-user=root cluster.yml
+    # You can ssh-copy-id to Ansible inventory hosts permanently for the pi user
+    declare PI=pi # replace 'pi' with 'ubuntu' or any other user
+    for ip in ${IPS[@]}; do ssh-copy-id $PI@$ip; done
+    # Enable SSH interface and PermitRootLogin over ssh in Raspberry    
+    for ip in ${IPS[@]}; do
+      ssh $PI@$ip sudo bash -c "echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config";
+      ssh $PI@$ip cat /etc/ssh/sshd_config | grep PermitRootLogin;
+     # To install etcd on nodes, Go lang is needed
+      ssh $PI@$ip sudo apt-get install golang -y;
+     # Ansible is reported as a trusted repository
+      ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367;
+     # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
 
-Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
+     # Get docker-ce (Read Ubuntu LTS https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+      ssh $PI@$pi sudo apt-get remove docker docker-engine docker.io containerd runc -y;
+     # Install packages to allow apt to use a repository over HTTPS
+      ssh $PI@$pi sudo apt-get update && sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y;
+     # Add Docker’s official GPG key
+      ssh $PI@$pi curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -;
+     # Use the following command to set up the stable repository.
+      ssh $PI@$pi sudo add-apt-repository "deb [arch=arm64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable";
+
+     # Install Docker Community Edition
+      ssh $PI@$pi sudo apt-get update && sudo apt-get install docker-ce -y;
+     # Install the latest version of Docker CE and containerd
+      ssh $PI@$pi sudo apt-get install docker-ce-cli containerd.io -y;
+
+    # The kube user which owns k8s daemons must be added to Ubuntu group.
+      ssh $PI@$pi sudo usermod -a -G ubuntu kube;
+    done
+
+    # Adjust the ansible_memtotal_mb to your Raspberry specs
+    cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
+
+    # Shortcut to actually set up the playbook on hosts:
+    scripts/setup_playbook.sh
+    # or you can use the extended version as well
+    # ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --private-key=~/.ssh/id_rsa  
+
+See [docs](./docs/ansible.md)
+
+>Note: When Ansible is already installed via system packages on the control machine, other python packages installed via `sudo pip3 install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).
 As a consequence, `ansible-playbook` command will fail with:
 ```
 ERROR! no action detected in task. This often indicates a misspelled module name, or incorrect module path.
 ```
 probably pointing on a task depending on a module present in requirements.txt (i.e. "unseal vault").
 
-One way of solving this would be to uninstall the Ansible package and then, to install it via pip but it is not always possible.
-A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip packages installation location, which can be found in the Location field of the output of `pip show [package]` before executing `ansible-playbook`.
+One way of solving this would be to uninstall the Ansible package and then, to install it via pip3 but it is not always possible.
+A workaround consists of setting `ANSIBLE_LIBRARY` and `ANSIBLE_MODULE_UTILS` environment variables respectively to the `ansible/modules` and `ansible/module_utils` subdirectories of pip3 packages installation location, which can be found in the Location field of the output of `pip3 show [package]` before executing `ansible-playbook`.
+
+#### Known issues :
+See [docs](./docs/ansible.md)
+
+- ModuleNotFoundError: No module named 'ruamel'
+```Traceback (most recent call last):
+  File "contrib/inventory_builder/inventory.py", line 36, in <module>
+    from ruamel.yaml import YAML
+```
+Please install inventory builder python libraries.
+>  sudo pip3 install -r contrib/inventory_builder/requirements.txt
+
+- CGROUPS_MEMORY missing to use ```kubeadm init```
+
+    [ERROR SystemVerification]: missing cgroups: memory
+
+The Linux kernel must be loaded with special cgroups enabled. Add the following to the kernel parameters:
+
+    cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+
+E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run as regular user with sudo privileges:
+
+    sed "$ s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1/" /boot/firmware/cmdline.txt | sudo tee /boot/firmware/cmdline.txt
+    reboot
+
+I see the msg: "Timed out (12s) waiting for privileges escalation"
+
+The ansible_user or --become_user must gain root privileges without password prompt. That's simply to edit the sudoers and add NOPASSWD: ALL to %admin and %sudo user group. E.g. from ansible host shell :
+
+    ssh <ansible_user>@<bastion-ip> 'sudo visudo; sudo reboot'
+
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. There are some issue kubernetes-sigs/kubespray#4261 to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
+
+- Kubeadm 1.10.1 known to feature arm64 binary in googlestorage.io
+
+- When you see the Error : no PUBKEY ... could be received from GPG Look at https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-debian
+
+- Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required, as for example writing SSL keys in /etc/, installing packages and interacting with various systemd daemons. Without -b argument the playbook would fall to start !
+
+ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v --become-user=root --private-key=~/.ssh/id_rsa
+
+- ```scripts/setup_playbook.sh```
+ command will fail with:
+
+    TASK [kubernetes/preinstall : Stop if ip var does not match local ips]
+
+    fatal: [raspberrypi]: FAILED! => {
+        "assertion": "ip in ansible_all_ipv4_addresses",
+        "changed": false,
+        "evaluated_to": false,
+        "msg": "Assertion failed"
+    }
+
+The host *ip* set in ```inventory/<mycluster>/hosts.ini``` is not the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that is attributed to the docker0 iface. E.g. _172.17.0.1_
+
+- Error:  open /etc/ssl/etcd/ssl/admin-<hostname>.pem: permission denied
+
+The file located at /etc/ssl/etcd is owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
+
+      ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
 
 ### Vagrant
 
 For Vagrant we need to install python dependencies for provisioning tasks.
-Check if Python and pip are installed:
+Check if Python3 and pip3 are installed:
 
-    python -V && pip -V
+    python3 -V && pip3 -V
 
 If this returns the version of the software, you're good to go. If not, download and install Python from here <https://www.python.org/downloads/source/>
 Install the necessary requirements
 
-    sudo pip install -r requirements.txt
+    sudo pip3 install -r requirements.txt
     vagrant up
 
 Documents
@@ -105,6 +207,7 @@ Supported Linux Distributions
 -   **Fedora** 28
 -   **Fedora/CentOS** Atomic
 -   **openSUSE** Leap 42.3/Tumbleweed
+• Ubuntu 16.04, 18.04 (Raspberries)
 
 Note: Upstart/SysV init based OS types are not supported.
 
