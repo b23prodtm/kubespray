@@ -64,21 +64,21 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
 
     # disable firewall for the setup
       ssh $PI@$pi sudo ufw disable;
+      # --setup-firewall opens default kubernetes ports in firewalld
+      scripts/my_playbook.sh --firewall-setup $PI@$pi
     done
 
     # Adjust the ansible_memtotal_mb to your Raspberry specs
     cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 
     # Shortcut to actually set up the playbook on hosts:
-    scripts/my_playbook.sh cluster.yml
+    scripts/my_playbook.sh cluster.yml --timeout=60
 
     # Displays help scripts/my_playbook.sh --help
     # or you can use the extended version as well
     # scripts/my_playbook.sh -i inventory/mycluster/hosts.ini cluster.yml
 
     for ip in ${IPS[@]}; do
-    # --setup-firewall opens default kubernetes ports in firewalld
-      scripts/my_playbook.sh --setup-firewall $PI@$pi
       ssh $PI@$pi sudo ufw enable;        
     done
 
