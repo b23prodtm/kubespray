@@ -97,8 +97,8 @@ kube_apiserver_port: 6443 # (https)
 kube_apiserver_insecure_port: 0 # (disabled)
 
 # Kube-proxy proxyMode configuration.
-# Can be ipvs, iptables
-kube_proxy_mode: iptables
+# Can be ipvs (ingress controller), iptables (behind firewall)
+kube_proxy_mode: ipvs
 
 # A string slice of values which specify the addresses to use for NodePorts.
 # Values may be valid IP blocks (e.g. 1.2.3.0/24, 1.2.3.4/32).
@@ -171,9 +171,9 @@ dynamic_kubelet_configuration_dir: "{{ kubelet_config_dir | default(default_kube
 podsecuritypolicy_enabled: false
 
 # Make a copy of kubeconfig on the host that runs Ansible in {{ inventory_dir }}/artifacts
-# kubeconfig_localhost: false
+kubeconfig_localhost: true
 # Download kubectl onto the host that runs Ansible in {{ bin_dir }}
-# kubectl_localhost: false
+kubectl_localhost: true
 
 # dnsmasq
 # dnsmasq_upstream_dns_servers:
