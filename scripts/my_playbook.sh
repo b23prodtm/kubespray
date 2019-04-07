@@ -9,28 +9,31 @@ function setup_crio() {
    ' || echo "Usage: $0 --crio-setup user@host"
 }
 function setup_firewall() {
+  usage="Usage: $0 --firewall-setup [-n[ode]] user@host status|enable|disable|.."
   while [ "$#" -gt 0 ]; do case $1 in
-    -n*)
+    -n*) # cluster-node
       shift
-      ssh $* 'sudo apt install firewalld;
-      sudo firewall-cmd --permanent --add-port=30000-32767/tcp;
-      sudo firewall-cmd --permanent --add-port=10250/tcp;
-      sudo firewall-cmd --permanent --add-port=10255/tcp;
-      sudo firewall-cmd --permanent --add-port=6783/tcp;
-      sudo firewall-cmd --reload' $* || echo "Usage: $0 --firewall-setup -n user@host"
+      ssh $1 'sudo ufw allow OpenSSH;
+      sudo ufw allow 30000:32767/tcp;
+      sudo ufw allow 10250/tcp;
+      sudo ufw allow 10255/tcp;
+      sudo ufw allow 6783/tcp;'
       break;;
-    *)
-      ssh $* 'sudo apt install firewalld;
-      sudo firewall-cmd --permanent --add-port=6443/tcp;
-      sudo firewall-cmd --permanent --add-port=2379/tcp;
-      sudo firewall-cmd --permanent --add-port=2380/tcp;
-      sudo firewall-cmd --permanent --add-port=10250/tcp;
-      sudo firewall-cmd --permanent --add-port=10251/tcp;
-      sudo firewall-cmd --permanent --add-port=10252/tcp;
-      sudo firewall-cmd --permanent --add-port=10255/tcp;
-      sudo firewall-cmd --reload' || echo "Usage: $0 --firewall-setup user@host"
+    *) # cluster-master
+      ssh $1 'sudo ufw allow OpenSSH;
+      sudo ufw allow 6443/tcp;
+      sudo ufw allow 2379/tcp;
+      sudo ufw allow 2380/tcp;
+      sudo ufw allow 10250/tcp;
+      sudo ufw allow 10251/tcp;
+      sudo ufw allow 10252/tcp;
+      sudo ufw allow 10255/tcp;'
       break;;
   esac; shift; done
+  ssh $1 '
+  sudo ufw logging on;
+  sudo ufw logging medium;
+  sudo ufw '$2 || echo $usage
 }
 inventory='inventory/mycluster/hosts.ini'
 defaults='-b --private-key=~/.ssh/id_rsa --ask-become-pass'
@@ -44,11 +47,11 @@ ${usage2}
 while [ "$#" -gt 0 ]; do case $1 in
   --crio-setup)
     shift
-    setup_crio $* -i ~/.ssh/id_rsa
+    setup_crio $@ -i ~/.ssh/id_rsa
     exit 0;;
   --firewall-setup)
     shift
-    setup_firewall $* -i ~/.ssh/id_rsa
+    setup_firewall $@ -i ~/.ssh/id_rsa
     exit 0;;
   -i*|--inventory)
     shift

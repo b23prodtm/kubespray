@@ -1,5 +1,6 @@
 ---
 - name: Kubernetes Apps | Wait for kube-apiserver
+  ignore_errors: yes
   uri:
     url: "{{ kube_apiserver_endpoint }}/healthz"
     validate_certs: no
@@ -8,7 +9,7 @@
   register: result
   until: result.status == 200
   retries: 10
-  delay: 6
+  delay: 30
   when: inventory_hostname == groups['kube-master'][0]
 
 - name: Kubernetes Apps | Check AppArmor status
