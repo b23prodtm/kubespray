@@ -56,8 +56,9 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
       ssh $PI@$ip sudo apt-get install golang -y;
      # Ansible is reported as a trusted repository
       ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367 &
-     # deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
-
+      ssh $PI@$ip echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu bionic main" | sudo tee -a /etc/apt/sources.list
+      ssh $PI@$ip echo "deb http://ppa.launchpad.net/projectatomic/ppa/ubuntu bionic main" | sudo tee -a /etc/apt/sources.list
+      ssh $PI@$ip echo "deb http://ppa.launchpad.net/alexlarsson/flatpak/ubuntu bionic main" | sudo tee -a /etc/apt/sources.list
     # The kube user which owns k8s daemons must be added to Ubuntu group.
       ssh $PI@$pi sudo usermod -a -G ubuntu kube;
 
@@ -124,7 +125,7 @@ E.g. : Raspberry Ubuntu Preinstalled server uses u-boot, then in ssh session run
     reboot
 
 > *PROBLEM*
-- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation. 
+- I may not be able to build a playbook on Arm, armv7l architectures Issues with systems such as Rasbian 9 and the Raspberries first and second generation.
 > *POSSIBLE ANSWER*
 There's [some issue](http://github.com/kubernetes-sigs/kubespray/issues/4261) to obtain 32 bits binary compatibility on those systems. Please post a comment if you find a way to enable 32 bits support for the k8s stack.
 
@@ -145,10 +146,10 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
                 "evaluated_to": false,
                 "msg": "Assertion failed"
             }
-            
+
     > *ANSWER*
     The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
-    
+
   > *PROBLEM*
     + fatal: "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
     + TASK [kubernetes/preinstall : Stop if either kube-master, kube-node or etcd is empty]
@@ -172,7 +173,7 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
                 "item": "etcd",
                 "msg": "All assertions passed"
             }
-        
+
     > *ANSWER*
     The inventory/<mycluster>/hosts.ini file [kube-node] or [kube-master] was empty. They cannot be the same. That assertion means that a kubernetes cluster is made of at least one kube-master and one kube-node.
 
@@ -196,7 +197,7 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
           ``--timeout=45`` and add ``--ask-become-pass`` (that's asking sudo password).
     > *POSSIBLE SOLUTION*
     If the error still happens, the ansible roles/ specific TASK configuration should set up the privileges escalation. Please contact the system administrator and [fill in an issue](https://github.com/kubernetes-sigs/kubespray/issues) about the TASK that must be fixed up.
-    
+
 > *ISSUE*
 - How much memory is left free on my master host ?
 > *ANSWER*

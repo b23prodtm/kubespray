@@ -8,7 +8,7 @@
 
 # Enables Service Proxy -- sets up IPVS for Kubernetes Services
 # see docs/kube-router.md "Caveats" section
-# kube_router_run_service_proxy: false
+ kube_router_run_service_proxy: true
 
 # Add Cluster IP of the service to the RIB so that it gets advertises to the BGP peers.
 # kube_router_advertise_cluster_ip: false
