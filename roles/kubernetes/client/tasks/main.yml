@@ -67,12 +67,13 @@
   when: kubeconfig_localhost|default(false)
 
 - name: Copy kubectl binary to ansible host
+  ignore_errors: yes
   fetch:
     src: "{{ bin_dir }}/kubectl"
     dest: "{{ artifacts_dir }}/kubectl"
     flat: yes
     validate_checksum: no
-  become: no
+  become: yes
   run_once: yes
   when: kubectl_localhost|default(false)
 
