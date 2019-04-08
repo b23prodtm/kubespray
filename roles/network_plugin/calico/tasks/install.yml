@@ -329,8 +329,8 @@
 
 - name: Calico | Create calico manifests
   template:
-    src: "{{item.file}}.j2"
-    dest: "{{kube_config_dir}}/{{item.file}}"
+    src: "{{ item.file }}.j2"
+    dest: "{{ kube_config_dir }}/{{ item.file }}"
   with_items:
     - {name: calico-config, file: calico-config.yml, type: cm}
     - {name: calico-node, file: calico-node.yml, type: ds}

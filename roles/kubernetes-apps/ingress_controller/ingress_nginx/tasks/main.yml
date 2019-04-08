@@ -52,8 +52,8 @@
 
 - name: NGINX Ingress Controller | Create manifests
   template:
-    src: "{{ item.file }}.j2"
-    dest: "{{ kube_config_dir }}/addons/ingress_nginx/{{ item.file }}"
+    src: "{{ item.item.file }}.j2"
+    dest: "{{ kube_config_dir }}/addons/ingress_nginx/{{ item.item.file }}"
   with_items: "{{ ingress_nginx_templates }}"
   register: ingress_nginx_manifests
   when:
@@ -61,11 +61,11 @@
 
 - name: NGINX Ingress Controller | Apply manifests
   kube:
-    name: "{{ item.name }}"
+    name: "{{ item.item.name }}"
     namespace: "{{ ingress_nginx_namespace }}"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.type }}"
-    filename: "{{ kube_config_dir }}/addons/ingress_nginx/{{ item.file }}"
+    resource: "{{ item.item.type }}"
+    filename: "{{ kube_config_dir }}/addons/ingress_nginx/{{ item.item.file }}"
     state: "latest"
   with_items: "{{ ingress_nginx_manifests.results }}"
   when:

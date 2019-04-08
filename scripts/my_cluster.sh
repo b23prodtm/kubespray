@@ -11,7 +11,7 @@ n='n'
 while true; do case $go in
         [nN]*) break;;
         [yY]*) echo $go; break;;
-	*) 
+	*)
 		read -p "Confirm $1 [${y}/${n}] ? " go
 		[ -z $go ] && go=$def_go;;
 esac; done
@@ -27,7 +27,7 @@ if [[ "$#" -gt 1 ]]; then IPS=$@; else while [[ -z $IPS ]]; do
   else
       echo -e "Enter two or more valid IP addresses of the form X.X.X.X : X€[0;255] \n"
   fi
-done; fi 
+done; fi
 logger -st kubespray "IPS=(${IPS[@]})\n"
 YAML=inventory/mycluster/hosts.yaml
 INI=inventory/mycluster/hosts.ini
@@ -39,11 +39,11 @@ cat inventory/mycluster/group_vars/all/all.yml
 [ $(cfrm_act "the options" 'y') > /dev/null ] || exit 0
 cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
 [ $(cfrm_act "the kubernetes configuration" 'y') > /dev/null ] || exit 0
-	
+
 declare PI=ubuntu # replace 'pi' with 'ubuntu' or any other user
 for ip in ${IPS[@]}; do
   logger -st kubespray-$ip "****** K8s ip : $PI@$ip ******"
-  ssh-copy-id $PI@$ip;    
+  ssh-copy-id $PI@$ip;
   logger -st kubespray-$ip "configure sshd"
   ssh $PI@$ip "sudo echo 'PermitRootLogin yes' | sudo tee -a /etc/ssh/sshd_config";
   ssh $PI@$ip sudo cat /etc/ssh/sshd_config | grep PermitRootLogin;
@@ -58,7 +58,7 @@ cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that:
 scripts/my_playbook.sh -i $INI cluster.yml --timeout=60
 #scripts/my_playbook.sh -i $YAML cluster.yml --timeout=60
 for ip in ${IPS[@]}; do
-   scripts/my_playbook.sh --setup-firewall $PI@$pi
+   scripts/my_playbook.sh --firewall-setup $PI@$pi status
    logger -st kubespray-$ip "enable firewall"
-   ssh $PI@$pi sudo ufw enable;        
+   ssh $PI@$pi sudo ufw enable;
 done

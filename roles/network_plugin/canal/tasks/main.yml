@@ -40,8 +40,8 @@
 
 - name: Canal | Create canal node manifests
   template:
-    src: "{{item.file}}.j2"
-    dest: "{{kube_config_dir}}/{{item.file}}"
+    src: "{{ item.file}}.j2"
+    dest: "{{ kube_config_dir }}/{{ item.file }}"
   with_items:
     - {name: canal-config, file: canal-config.yaml, type: cm}
     - {name: canal-node, file: canal-node.yaml, type: ds}
