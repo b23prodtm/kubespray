@@ -36,6 +36,7 @@
   when: ansible_os_family in ["CoreOS", "Container Linux by CoreOS"]
 
 - name: Preinstall | reload kubelet
+  ignore_errors: yes
   service:
     name: kubelet
     state: restarted
