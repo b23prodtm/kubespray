@@ -50,15 +50,15 @@ for ip in ${IPS[@]}; do
   logger -st kubespray-$ip "install go"
   ssh $PI@$ip sudo apt-get install golang -y;
   #ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367 &
-  ssh $PI@$pi sudo usermod -a -G ubuntu kube;
+  ssh $PI@$ip sudo usermod -a -G ubuntu kube;
   logger -st kubespray-$ip "disable firewall"
-  ssh $PI@$pi sudo ufw disable;
+  ssh $PI@$ip sudo ufw disable;
 done
 cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 scripts/my_playbook.sh -i $INI cluster.yml --timeout=60
 #scripts/my_playbook.sh -i $YAML cluster.yml --timeout=60
 for ip in ${IPS[@]}; do
-   scripts/my_playbook.sh --firewall-setup $PI@$pi status
+   scripts/my_playbook.sh --firewall-setup $PI@$ip status
    logger -st kubespray-$ip "enable firewall"
-   ssh $PI@$pi sudo ufw enable;
+   ssh $PI@$ip sudo ufw enable;
 done
