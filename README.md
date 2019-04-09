@@ -186,7 +186,7 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
     > *ANSWER*
     The file located at /etc/ssl/etcd's owned by another user than Ubuntu and cannot be accessed by Ansible. Please change the file owner:group to ```ubuntu:ubuntu``` or the *ansible_user* or your choice.
 
-            ssh <ansible_user>@<bastion-ip> 'sudo chown ubuntu:ubuntu -R /etc/ssl/etcd/'
+            ssh <ansible_user>@<bastion-ip> 'sudo chown kube:ubuntu -R /etc/ssl/etcd/'
 
     > *PROBLEM*
     + E: Unable to locate package unzip

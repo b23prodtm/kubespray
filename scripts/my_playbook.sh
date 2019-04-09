@@ -35,11 +35,11 @@ function setup_firewall() {
   sudo ufw logging medium;
   sudo ufw '$2 || echo $usage
 }
-inventory='inventory/mycluster/hosts.ini'
+inventory='inventory/mycluster'
 defaults='-b --private-key=~/.ssh/id_rsa --ask-become-pass'
 options=""
 usage="Usage: $0 [-i,--inventory <inventory/path/to/hosts.ini>] <yaml> [ansible-playbook options]"
-usage2="Usage: $0 --crio-setup|--firewall-setup <user>@<master-node-ip>"
+usage2="Usage: $0 --crio-setup|--firewall-setup <user>@<master-node-ip> status|enable|disable|..."
 [ "$#" -lt 1 ] && echo "
 ${usage}
 ${usage2}
@@ -64,5 +64,5 @@ while [ "$#" -gt 0 ]; do case $1 in
     defaults="";;
   *) options="${options} $1";;
 esac; shift; done
-ansible-playbook -i $inventory $defaults $options && echo "Next call must be a firewall-cmd :
+logger -s "Please, check the ubuntu firewall status..." && ansible-playbook -i ${inventory}/hosts.ini $defaults $options && echo "Next call must be ${inventory}/artifacts/kubectl.sh :
 ${usage2}"
