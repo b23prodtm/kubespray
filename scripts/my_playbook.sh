@@ -9,31 +9,7 @@ function setup_crio() {
    ' || echo "Usage: $0 --crio-setup user@host"
 }
 function setup_firewall() {
-  usage="Usage: $0 --firewall-setup [-n[ode]] user@host status|enable|disable|.."
-  while [ "$#" -gt 0 ]; do case $1 in
-    -n*) # cluster-node
-      shift
-      ssh $1 'sudo ufw allow OpenSSH;
-      sudo ufw allow 30000:32767/tcp;
-      sudo ufw allow 10250/tcp;
-      sudo ufw allow 10255/tcp;
-      sudo ufw allow 6783/tcp;'
-      break;;
-    *) # cluster-master
-      ssh $1 'sudo ufw allow OpenSSH;
-      sudo ufw allow 6443/tcp;
-      sudo ufw allow 2379/tcp;
-      sudo ufw allow 2380/tcp;
-      sudo ufw allow 10250/tcp;
-      sudo ufw allow 10251/tcp;
-      sudo ufw allow 10252/tcp;
-      sudo ufw allow 10255/tcp;'
-      break;;
-  esac; shift; done
-  ssh $1 '
-  sudo ufw logging on;
-  sudo ufw logging medium;
-  sudo ufw '$2 || echo $usage
+  source my_firewall.sh $*
 }
 inventory='inventory/mycluster'
 defaults='-b --private-key=~/.ssh/id_rsa --ask-become-pass'
