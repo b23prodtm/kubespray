@@ -152,7 +152,7 @@ Deploy Kubespray with Ansible Playbook to raspberrypi The option -b is required,
             }
 
     > *ANSWER*
-    The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (iface). Run with ssh@... terminal : ```ifconfig docker0``` to find the ipv4 address that's attributed to the docker0 iface. E.g. _172.17.0.1_
+    The host *ip* set in ```inventory/<mycluster>/hosts.ini``` isn't the docker network interface (private). Run with ssh@... terminal : ```ifconfig``` to find the ipv4 address that's attributed to the eth0/wlan0 iface. E.g. _10.3.0.1_ (public network)
 
   > *PROBLEM*
     + fatal: "cmd": ["timeout", "-k", "600s", "600s", "/usr/local/bin/kubeadm", "init", "--config=/etc/kubernetes/kubeadm-config.yaml"
