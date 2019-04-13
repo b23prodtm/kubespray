@@ -14,7 +14,7 @@
   register: calico_version_on_server
   run_once: yes
   delegate_to: "{{ groups['kube-master'][0] }}"
-  async: 10
+  async: 120
   poll: 3
   changed_when: false
 
