@@ -40,5 +40,9 @@ while [ "$#" -gt 0 ]; do case $1 in
     defaults="";;
   *) options="${options} $1";;
 esac; shift; done
-logger -s "Please, check the ubuntu firewall status..." && ansible-playbook -i ${inventory}/hosts.ini $defaults $options && echo "Next call must be ${inventory}/artifacts/kubectl.sh :
+logger -s "Disable the cluster firewall if you can..."
+logger -s "If a TASK failed on timeouts, reboot the kubernetes cluster before to retry..."
+logger -s "Known TASKs that take more time : [Start of Calico kube controllers], [Kubernetes Apps | Start Resources]..."
+logger -s "It's going to take about half an hour per host to complete the cluster boot process..."
+logger -s "Please don't shutdown anything until it finishes..." && ansible-playbook -i ${inventory}/hosts.ini $defaults $options && echo "Next call must be ${inventory}/artifacts/kubectl.sh :
 ${usage2}"
