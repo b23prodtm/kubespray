@@ -19,12 +19,13 @@
   register: manifests
   when: inventory_hostname == groups['kube-master'][0]
 
-- name: Copy dashboard template to ansible host
-  ignore_errors: yes
+- name: Import artifacts_dir
   import_role:
     name: kubernetes/client
-    vars:
-      artifacts_dir: artifacts_dir
+    defaults_from: main
+
+- name: Copy dashboard template to ansible host
+  ignore_errors: yes
   copy:
     src: "{{ kube_config_dir }}/{{ item.item.file }}"
     dest: "{{ artifacts_dir }}/{{ item.item.file }}"
