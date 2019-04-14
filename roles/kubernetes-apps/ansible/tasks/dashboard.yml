@@ -21,6 +21,10 @@
 
 - name: Copy dashboard template to ansible host
   ignore_errors: yes
+  import_role:
+    name: kubernetes/client
+    vars:
+      artifacts_dir: artifacts_dir
   copy:
     src: "{{ kube_config_dir }}/{{ item.item.file }}"
     dest: "{{ artifacts_dir }}/{{ item.item.file }}"

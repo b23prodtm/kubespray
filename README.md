@@ -48,6 +48,9 @@ Ansible v2.7.0's failing and/or produce unexpected results due to [ansible/ansib
     # Start Dashboard and kubernetes controllers
     scripts/start_dashboard.sh
 
+### Accessing the dashboard
+Available from the master host (e.g. raspberrypib), through proxy at locahost:8001 [https://first_master:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login](https://localhost:8001api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login).
+
 See [Ansible](docs/ansible.md) documentation. Ansible uses tags to define TASK groups management.
 
 >Note: When Ansible's already installed via system packages on the control machine, other python packages installed via `sudo pip install -r requirements.txt` will go to a different directory tree (e.g. `/usr/local/lib/python2.7/dist-packages` on Ubuntu) from Ansible's (e.g. `/usr/lib/python2.7/dist-packages/ansible` still on Ubuntu).

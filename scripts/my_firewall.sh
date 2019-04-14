@@ -7,6 +7,7 @@ sudo iptables -t mangle -F
 sudo iptables -F
 sudo iptables -X'
 ufw_rules='sudo ufw allow OpenSSH;
+sudo ufw allow 8443/tcp;
 sudo ufw allow 6443/tcp;
 sudo ufw allow 2379/tcp;
 sudo ufw allow 2380/tcp;
