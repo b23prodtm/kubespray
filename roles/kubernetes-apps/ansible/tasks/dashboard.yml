@@ -19,6 +19,19 @@
   register: manifests
   when: inventory_hostname == groups['kube-master'][0]
 
+- name: Copy dashboard template to ansible host
+  ignore_errors: yes
+  copy:
+    src: "{{ kube_config_dir }}/{{ item.item.file }}"
+    dest: "{{ artifacts_dir }}/{{ item.item.file }}"
+    remote_src: yes
+  become: no
+  run_once: yes
+  with_items: "{{ manifests.results }}"
+  when: kubectl_localhost|default(false)
+  tags:
+    - client
+
 - name: Kubernetes Apps | Start dashboard
   kube:
     name: "{{ item.item.name }}"

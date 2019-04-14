@@ -1,4 +1,6 @@
+#!/usr/bin/env bash
 function setup_crio() {
+   logger -st kubespray "CRI-O's currently unstable in Kubespray"
    ssh $1 '
    sudo add-apt-repository ppa:alexlarsson/flatpak;
    sudo add-apt-repository ppa:projectatomic/ppa;
@@ -12,7 +14,7 @@ function setup_firewall() {
   source my_firewall.sh $*
 }
 inventory='inventory/mycluster'
-defaults='-b --private-key=~/.ssh/id_rsa --ask-become-pass'
+defaults='-b --private-key=~/.ssh/id_rsa'
 options=""
 usage="Usage: $0 [-i,--inventory <inventory/path/to/hosts.ini>] <yaml> [ansible-playbook options]"
 usage2="Usage: $0 --crio-setup|--firewall-setup <user>@<master-node-ip> status|enable|disable|..."
@@ -44,5 +46,4 @@ logger -s "Disable the cluster firewall if you can..."
 logger -s "If a TASK failed on timeouts, reboot the kubernetes cluster before to retry..."
 logger -s "Known TASKs that take more time : [Start of Calico kube controllers], [Kubernetes Apps | Start Resources]..."
 logger -s "It's going to take about half an hour per host to complete the cluster boot process..."
-logger -s "Please don't shutdown anything until it finishes..." && ansible-playbook -i ${inventory}/hosts.ini $defaults $options && echo "Next call must be ${inventory}/artifacts/kubectl.sh :
-${usage2}"
+logger -s "Please don't shutdown anything until it finishes..." && ansible-playbook -i ${inventory}/hosts.ini $defaults $options && echo "Next call must be scripts/start_dashboard.sh --timeout=60"
