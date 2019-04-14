@@ -13,7 +13,6 @@ RUN  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && 
      stable" \
      && apt update -y && apt-get install docker-ce -y
 COPY . .
-RUN /usr/bin/python3 -m pip3 install pip3 -U && /usr/bin/python3 -m pip3 install -r tests/requirements.txt && python3 -m pip3 install -r requirements.txt
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.11.3/bin/linux/amd64/kubectl \
+RUN /usr/bin/python -m pip install pip -U && /usr/bin/python -m pip install -r tests/requirements.txt && python -m pip install -r requirements.txt
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.13.5/bin/linux/amd64/kubectl \
     && chmod a+x kubectl && cp kubectl /usr/local/bin/kubectl
-
