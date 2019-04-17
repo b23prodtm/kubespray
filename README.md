@@ -38,9 +38,10 @@ To deploy the cluster you can use :
     # Setup cluster inventory file with inventory builder . Single master cluster is possible.
     scripts/my_cluster.sh
 
-    # Setup cluster playbook
-    scripts/my_playbook.sh --timeout=120 cluster.yml
-
+    # Setup cluster playbook (two phases avoid too long tasks to "stall“, out of resources)
+    scripts/my_playbook.sh --timeout=120 cluster.yml --skip-tags=apps,resolvconf
+    scripts/my_playbook.sh --timeout=120 cluster.yml --tags=apps,resolvconf
+    
     # Start Dashboard and kubernetes controllers
     scripts/start_dashboard.sh
 

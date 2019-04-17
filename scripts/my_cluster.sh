@@ -17,16 +17,16 @@ while true; do case $go in
 		[ -z $go ] && go=$def_go;;
 esac; done
 }
-IFS=' '
+IFS=' ' # Read prompt Field Separator
 if [[ "$#" -gt 1 ]]; then IPS=$@; else while [[ -z $IPS ]]; do
 	read -p "Please type in up to 6 local network ip${IFS}2°ip${IFS}3°ip...: (CTRL-C to exit) " -a ips
 	echo -e "\n"
-  if [[ ${#ips[@]} -gt 1 ]]; then
+  if [[ ${#ips[@]} -ge 1 ]]; then
   	if [[ $(cfrm_act "you've entered the correct ips addresses ${ips[0]} ${ips[1]} ${ips[2]} ${ips[3]} ${ips[4]} ${ips[5]}" 'n') > /dev/null ]]; then
   		IPS=${ips[@]}
   	fi
   else
-      echo -e "Enter two or more valid IP addresses of the form X.X.X.X : X€[0;255] \n"
+      echo -e "Enter one or more valid IP addresses of the form X.X.X.X : X€[0;255] \n"
   fi
 done; fi
 logger -st kubespray "IPS=(${IPS[@]})\n"
