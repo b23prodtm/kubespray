@@ -52,9 +52,12 @@ for ip in ${IPS[@]}; do
   logger -st kubespray-$ip "install go";
   ssh $PI@$ip sudo apt-get install golang -y;
   logger -st kubespray-$ip "trusted repository";
-  ssh $PI@$ip echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu bionic main | sudo tee -a /etc/apt/sources.list";
-  ssh $PI@$ip echo "deb http://ppa.launchpad.net/projectatomic/ppa/ubuntu bionic main | sudo tee -a /etc/apt/sources.list";
-  ssh $PI@$ip echo "deb http://ppa.launchpad.net/alexlarsson/flatpak/ubuntu bionic main | sudo tee -a /etc/apt/sources.list";
+  ssh $PI@$ip sudo add-apt-repository \
+       "deb [arch=arm64] http://ppa.launchpad.net/ansible/ansible/ubuntu bionic main";
+  ssh $PI@$ip sudo add-apt-repository \
+       "deb [arch=arm64] http://ppa.launchpad.net/projectatomic/ppa/ubuntu bionic main";
+  ssh $PI@$ip sudo add-apt-repository \
+       "deb [arch=arm64] http://ppa.launchpad.net/alexlarsson/flatpak/ubuntu bionic main";
   logger -st kubespray-$ip "add kube user into ubuntu group";
   ssh $PI@$ip sudo usermod -a -G ubuntu kube;
   logger -st kubespray-$ip "disable ubuntu firewall";
@@ -71,7 +74,7 @@ for ip in ${IPS[@]}; do
       gnupg-agent \
       software-properties-common;
   logger -st docker-$ip "add docker repository packages";
-  ssh $PI@$ip sudo sudo add-apt-repository \
+  ssh $PI@$ip sudo add-apt-repository \
        "deb [arch=arm64] https://download.docker.com/linux/ubuntu \
        bionic \
        stable";
