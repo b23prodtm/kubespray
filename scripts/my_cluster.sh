@@ -83,7 +83,8 @@ for ip in ${IPS[@]}; do
   logger -st docker-$ip "remove old docker-ce";
   ssh $PI@$ip sudo apt-get remove docker docker-engine docker.io containerd runc;
   logger -st docker-$ip "get docker-ce for ubuntu bionic";
-  ssh $PI@$ip sudo apt-get install docker-ce=5:18.09.5~3-0~ubuntu-bionic docker-ce-cli containerd.io;
+  ssh $PI@$ip "sudo apt-get update && sudo apt-get install docker-ce -y";
+  ssh $PI@$ip sudo apt-get install docker-ce-cli containerd.io;
 done
 cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 logger -st kubespray "****** K8s ansible : Run Playbook cluster.yml ******"
