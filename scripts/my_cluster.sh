@@ -67,7 +67,7 @@ for ip in ${IPS[@]}; do
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8becf1637ad8c79d &
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys c793bfa2fa577f07 &
   logger -st docker-$ip "allow https repository";
-  ssh $PI@$ip sudo apt-get install \
+  ssh $PI@$ipsudo apt-get install \
       apt-transport-https \
       ca-certificates \
       curl \
@@ -79,7 +79,7 @@ for ip in ${IPS[@]}; do
        bionic \
        stable";
   logger -st docker-$ip "add docker repository key";
-  ssh $PI@$ip sudo "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
+  ssh $PI@$ipsudo "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
   logger -st docker-$ip "remove old docker-ce";
   ssh $PI@$ip sudo apt-get remove docker docker-engine docker.io containerd runc;
   logger -st docker-$ip "get docker-ce for ubuntu bionic";
