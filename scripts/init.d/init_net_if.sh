@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 yaml='01-hostap.yaml'
 clientyaml='01-cliwpa.yaml'
-NP_ORIG=~/.netplan-store && sudo mkdir -p $NP_ORIG
+NP_ORIG=${work_dir}../../.netplan-store && sudo mkdir -p $NP_ORIG
 logger -st netplan "disable cloud-init"
 sudo mv -fv /etc/netplan/50-cloud-init.yaml $NP_ORIG
 echo -e "network: { config: disabled }" | sudo tee /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
@@ -22,7 +23,8 @@ while [ "$#" -gt 0 ]; do case $1 in
     fi
     return;;
   -c*|--client)
-    python library/psenv.py $*
+    python ${work_dir}../library/psenv.py $*
+    source .hap-wiz-env.sh && rm -f .hap-wiz-env.sh
     if [ -f /etc/init.d/networking ]; then
       echo -e "${MARKER_BEGIN}
 auto lo br0
@@ -104,14 +106,14 @@ logger -st netplan "/etc/netplan/$yaml was created"
       access-points:
         \"\":
           password:
-      addresses: [${NET}.2/${MASKb}, '${NET6}:2/${MASKb6}']
+      addresses: [${NET}.2/${MASKb}, '${NET6}2/${MASKb6}']
   bridges:
     br0:
       dhcp4: yes
       dhcp6: yes
-      addresses: [${NET}.1/${MASKb}, '${NET6}:1/${MASKb6}']
+      addresses: [${NET}.1/${MASKb}, '${NET6}1/${MASKb6}']
       nameservers:
-        addresses: [${NET}.1, '${NET6}:1']
+        addresses: [${NET}.1, '${NET6}1']
       interfaces:
         - wlan0
         - eth0" | sudo tee /etc/netplan/$yaml

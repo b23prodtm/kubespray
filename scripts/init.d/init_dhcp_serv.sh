@@ -39,7 +39,7 @@ range ${NET}.${NET_start} ${NET}.${NET_end};
 }
 " | sudo tee /etc/dhcp/dhcpd.conf
 sudo cat /etc/dhcp/dhcpd.conf
-echo -e "option dhcp6.name-servers ${NET6}:1;
+echo -e "option dhcp6.name-servers ${NET6}1;
 
 default-lease-time 600;
 max-lease-time 7200;
@@ -51,7 +51,7 @@ log-facility local7;
 subnet6 ${INTNET6}0/${INTMASKb6} {}
 subnet6 ${NET6}0/${MASKb6} {
 #option dhcp6.domain-name "wifi.localhost";
-range6 ${NET6}:${NET_start} ${NET6}:${NET_end};
+range6 ${NET6}${NET_start} ${NET6}${NET_end};
 # Example for a fixed host address
 #      host specialclient {
 #      host-identifier option dhcp6.client-id 00:01:00:01:4a:1f:ba:e3:60:b9:1f:01:23:45;

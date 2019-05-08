@@ -11,7 +11,8 @@ then
     exit 1
 fi
 [ "$#" -lt 2 ] && python3 library/hap-wiz-env.py --help && exit 1
-python3 library/hap-wiz-env.py $*
+export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
+python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh && rm -f .hap-wiz-env.sh
 echo "Set Private Network $NET.0/$MASK"
 echo "Set Private Network IPv6 ${NET6}0/$MASKb6"
@@ -23,7 +24,6 @@ echo "Set WAN Network IPv6 ${INTNET6}0/$INTMASKb6"
 [ -z $CLIENT ] && [ -z $(which brctl) ] && sudo apt-get -y install bridge-utils
 [ -z $CLIENT ] && [ -z $(which dhcpd) ] && sudo apt-get -y install isc-dhcp-server
 logger -st hostapd "remove bridge (br0) to wlan0"
-export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 source ${work_dir}init.d/init_net_if.sh -r
 logger -st service "shutdown services"
 sudo service wpa_supplicant stop
