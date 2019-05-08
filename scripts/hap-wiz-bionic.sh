@@ -13,7 +13,7 @@ fi
 [ "$#" -lt 2 ] && python3 library/hap-wiz-env.py --help && exit 1
 export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 python3 ${work_dir}../library/hap-wiz-env.py $*
-source .hap-wiz-env.sh && rm -f .hap-wiz-env.sh
+source .hap-wiz-env.sh
 echo "Set Private Network $NET.0/$MASK"
 echo "Set Private Network IPv6 ${NET6}0/$MASKb6"
 echo "Set WAN Network $INTNET.0/$INTMASK"

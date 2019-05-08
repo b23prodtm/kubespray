@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
+[ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $*
+source .hap-wiz-env.sh
 while [ "$#" -gt 0 ]; do case $1 in
   -r*|-R*)
     sudo systemctl disable dnsmasq.service
@@ -58,8 +61,8 @@ range6 ${NET6}${NET_start} ${NET6}${NET_end};
 #        fixed-address6 ${NET6}:127; }
 }
 " | sudo tee /etc/dhcp/dhcpd6.conf
-sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"br0\"/" /etc/default/isc-dhcp-server
-sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"br0\"/" /etc/default/isc-dhcp-server
+sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"wlan0\"/" /etc/default/isc-dhcp-server
+sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"wlan0\"/" /etc/default/isc-dhcp-server
 sudo cat /etc/default/isc-dhcp-server
 sleep 1
 logger -st dhcpd "start DHCP server"

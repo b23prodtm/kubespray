@@ -45,6 +45,7 @@ def r_parse_argv(defaults, argv, i, options, usage):
     pf = "-+[" + options + "]*"
     client = re.compile(pf + "c(lient)?.*")
     help = re.compile(pf + "h(elp)?.*")
+    any = re.compile(pf)
     if i < len(argv):
         if client.match(argv[i]):
             myenv['CLIENT'] = argv[i]
@@ -52,6 +53,8 @@ def r_parse_argv(defaults, argv, i, options, usage):
         elif help.match(argv[1]):
             print(usage)
             sys.exit(0)
+        elif any.match(argv[i]):
+            del argv[i]
     n = 0
     for k in defaults.keys():
          if n == i:
@@ -89,7 +92,6 @@ def main(argv):
     parse_args(argv)
     while myenv["SSID"] == "":
         myenv["SSID"] = input("Please set a name for the Wifi Network: ")
-    password="1"
     while len(myenv["PAWD"]) < 8 or len(myenv["PAWD"]) > 63:
         myenv["PAWD"] = input("Please set a passphrase (8..63 characters) for the SSID " + myenv['SSID'] + ": ")
     while myenv["MODE"] not in ['a','b','g']:

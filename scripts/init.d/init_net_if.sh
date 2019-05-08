@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
+[ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $* 
+source .hap-wiz-env.sh
 yaml='01-hostap.yaml'
 clientyaml='01-cliwpa.yaml'
 NP_ORIG=${work_dir}../../.netplan-store && sudo mkdir -p $NP_ORIG
 logger -st netplan "disable cloud-init"
 sudo mv -fv /etc/netplan/50-cloud-init.yaml $NP_ORIG
 echo -e "network: { config: disabled }" | sudo tee /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
-export MARKER_BEGIN="# BEGIN GENERATED hostapd" MARKER_END="# END GENERATED hostapd" MARKERS="${MARKER_BEGIN}\\n.*\\n.*${MARKER_END}"
-export CLIENT NET NET6 NET_start=15 NET_end=100 INT MASK=255.255.255.0 MASK6='ffff:ffff:ffff:ffff::' MASKb=24 MASKb6='64' SSID PAWD MODE CTY_CODE CHANNEL=0
 while [ "$#" -gt 0 ]; do case $1 in
   -r*|-R*)
     sudo sed -i /bridge=br0/s/^/\#/ /etc/hostapd/hostapd.conf
@@ -23,8 +23,6 @@ while [ "$#" -gt 0 ]; do case $1 in
     fi
     return;;
   -c*|--client)
-    python ${work_dir}../library/psenv.py $*
-    source .hap-wiz-env.sh && rm -f .hap-wiz-env.sh
     if [ -f /etc/init.d/networking ]; then
       echo -e "${MARKER_BEGIN}
 auto lo br0
@@ -47,6 +45,8 @@ ${MARKER_END}" | sudo tee /etc/network/interfaces
       dhcp4: yes
   wifis:
     wlan0:
+      dhcp4: yes
+      dhcp6: yes
       access-points:
         \"${SSID}\":
           password: \"${PAWD}\"" | sudo tee /etc/netplan/$clientyaml
@@ -62,7 +62,7 @@ ${MARKER_END}" | sudo tee /etc/network/interfaces
     --client
       Render as Wifi client to netplan"
       exit 1;;
-    *);;
+   *);;
 esac; shift; done
 if [ -f /etc/init.d/networking ]; then
 # ubuntu < 18.04
@@ -71,7 +71,7 @@ auto lo br0
 iface lo inet loopback
 
 allow-hotplug eth0
-iface ${INT} inet manual
+iface ${INT} inet dhcp
  network ${INTNET}.0
 
 allow-hotplug wlan0
@@ -81,11 +81,11 @@ iface wlan0 inet dhcp
   netmask ${MASK}
 # Bridge setup
 auto br0
-iface br0 inet dhcp
-  address ${NET}.1
-  network ${NET}.0
-  netmask ${MASK}
-  nameservers ${NET}.1
+iface br0 inet manual
+  address 10.33.0.1
+  network 10.33.0.0
+  netmask 255.255.255.0
+  nameservers 10.33.0.1, 8.8.8.8, 8.8.4.4
 bridge_ports wlan0 ${INT}
 ${MARKER_END}" | sudo tee /etc/network/interfaces
   logger -st brctl "share the internet wireless over bridge"
@@ -98,22 +98,22 @@ logger -st netplan "/etc/netplan/$yaml was created"
   version: 2
   renderer: networkd
   ethernets:
-    eth0:
+    ${INT}:
       dhcp4: yes
       dhcp6: no
   wifis:
     wlan0:
+      dhcp4: yes
+      dhcp6: yes
       access-points:
         \"\":
           password:
-      addresses: [${NET}.2/${MASKb}, '${NET6}2/${MASKb6}']
+      addresses: [${NET}.1/${MASKb}, '${NET6}1/${MASKb6}']
   bridges:
     br0:
-      dhcp4: yes
-      dhcp6: yes
-      addresses: [${NET}.1/${MASKb}, '${NET6}1/${MASKb6}']
+      addresses: [10.33.0.1/24, '2001:db8:1:46::1/64']
       nameservers:
-        addresses: [${NET}.1, '${NET6}1']
+        addresses: [10.33.0.1, '2001:db8:1:46::1', 8.8.8.8, 8.8.4.4]
       interfaces:
         - wlan0
         - eth0" | sudo tee /etc/netplan/$yaml
@@ -124,3 +124,7 @@ if [ -f /etc/init.d/networking ]; then
 else
   [ $(sudo netplan try --timeout 12) 2> /dev/null ] && exit 1
 fi
+logger -st dhclient "redeem ip address ${INT}"
+sudo dhclient ${INT}
+logger -st ip "wakeup wlan0"
+sudo ip link set dev wlan0 up
