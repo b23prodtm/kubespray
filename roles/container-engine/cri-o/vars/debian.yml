@@ -1,5 +1,31 @@
 ---
 crio_packages:
+  - libostree-dev
   - cri-o-1.13
+  - cri-o-runc
 
 crio_service: crio
+
+crio_repo_key_info:
+  pkg_key: apt_key
+  url: '{{ crio_debian_repo_gpgkey }}'
+  repo_keys:
+    - 018BA5AD9DF57A4448F0E6CF8BECF1637AD8C79D
+
+ostree_repo_key_info:
+  pkg_key: apt_key
+  url: '{{ ostree_debian_repo_gpgkey }}'
+  repo_keys:
+    - 690951F1A4DE0F905496E8C6C793BFA2FA577F07
+
+crio_repo_info:
+  pkg_repo: apt_repository
+  repos:
+    - >
+       deb {{ crio_debian_repo_base_url }}
+       {{ ansible_distribution_release|lower }}
+       main
+    - >
+       deb {{ ostree_debian_repo_base_url }}
+       {{ ansible_distribution_release|lower }}
+       main

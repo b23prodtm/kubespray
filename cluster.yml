@@ -16,8 +16,8 @@
 - hosts: bastion[0]
   gather_facts: False
   roles:
-    - { role: kubespray-defaults}
-    - { role: bastion-ssh-config, tags: ["localhost", "bastion"]}
+    - { role: kubespray-defaults }
+    - { role: bastion-ssh-config, tags: ["localhost", "bastion"] }
 
 - hosts: k8s-cluster:etcd:calico-rr
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
@@ -48,6 +48,7 @@
   roles:
     - { role: kubespray-defaults}
     - { role: kubernetes/preinstall, tags: preinstall }
+    - { role: download, tags: download, when: "not skip_downloads and container_manager == 'crio'" }
     - { role: "container-engine", tags: "container-engine", when: deploy_container_engine|default(true) }
     - { role: download, tags: download, when: "not skip_downloads" }
   environment: "{{proxy_env}}"

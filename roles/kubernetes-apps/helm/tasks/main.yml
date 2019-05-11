@@ -7,8 +7,8 @@
 
 - name: Helm | Lay Down Helm Manifests (RBAC)
   template:
-    src: "{{item.file}}.j2"
-    dest: "{{kube_config_dir}}/{{item.file}}"
+    src: "{{ item.file }}.j2"
+    dest: "{{ kube_config_dir }}/{{ item.file }}"
   with_items:
     - {name: tiller, file: tiller-namespace.yml, type: namespace}
     - {name: tiller, file: tiller-sa.yml, type: sa}
@@ -20,11 +20,11 @@
 
 - name: Helm | Apply Helm Manifests (RBAC)
   kube:
-    name: "{{item.name}}"
+    name: "{{ item.item.name }}"
     namespace: "{{ tiller_namespace }}"
-    kubectl: "{{bin_dir}}/kubectl"
-    resource: "{{item.type}}"
-    filename: "{{kube_config_dir}}/{{item.file}}"
+    kubectl: "{{ bin_dir }}/kubectl"
+    resource: "{{ item.item.type }}"
+    filename: "{{ kube_config_dir }}/{{ item.item.file }}"
     state: "latest"
   with_items: "{{ manifests.results }}"
   when:
@@ -73,7 +73,7 @@
     {% if tiller_secure_release_info %} --override 'spec.template.spec.containers[0].command'='{/tiller,--storage=secret}' {% endif %}
     {% if tiller_wait %} --wait{% endif %}
     --output yaml
-    | {{bin_dir}}/kubectl apply -f -
+    | {{ bin_dir }}/kubectl apply -f -
   changed_when: false
   when:
     - (tiller_override is defined and tiller_override != "") or (kube_version is version('v1.11.1', '>='))

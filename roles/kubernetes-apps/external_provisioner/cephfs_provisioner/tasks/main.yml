@@ -69,11 +69,11 @@
 
 - name: CephFS Provisioner | Apply manifests
   kube:
-    name: "{{ item.name }}"
+    name: "{{ item.item.name }}"
     namespace: "{{ cephfs_provisioner_namespace }}"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.type }}"
-    filename: "{{ kube_config_dir }}/addons/cephfs_provisioner/{{ item.file }}"
+    resource: "{{ item.item.type }}"
+    filename: "{{ kube_config_dir }}/addons/cephfs_provisioner/{{ item.item.file }}"
     state: "latest"
   with_items: "{{ cephfs_provisioner_manifests.results }}"
   when: inventory_hostname == groups['kube-master'][0]

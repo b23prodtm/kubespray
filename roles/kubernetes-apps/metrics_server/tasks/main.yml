@@ -47,10 +47,10 @@
 
 - name: Metrics Server | Apply manifests
   kube:
-    name: "{{ item.name }}"
+    name: "{{ item.item.name }}"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.type }}"
-    filename: "{{ kube_config_dir }}/addons/metrics_server/{{ item.file }}"
+    resource: "{{ item.item.type }}"
+    filename: "{{ kube_config_dir }}/addons/metrics_server/{{ item.item.file }}"
     state: "latest"
   with_items: "{{ metrics_server_manifests.results }}"
   when:

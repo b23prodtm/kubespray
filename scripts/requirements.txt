@@ -1,0 +1,2 @@
+python-nacl>=1.1.2
+libffi-dev>=3.2.1

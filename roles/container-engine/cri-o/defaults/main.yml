@@ -1,2 +1,6 @@
 ---
 crio_rhel_repo_base_url: 'https://cbs.centos.org/repos/paas7-openshift-origin311-candidate/x86_64/os/'
+crio_debian_repo_base_url: 'https://ppa.launchpad.net/projectatomic/ppa/ubuntu'
+crio_debian_repo_gpgkey: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8BECF1637AD8C79D'
+ostree_debian_repo_base_url: 'https://ppa.launchpad.net/alexlarsson/flatpak/ubuntu'
+ostree_debian_repo_gpgkey: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC793BFA2FA577F07'

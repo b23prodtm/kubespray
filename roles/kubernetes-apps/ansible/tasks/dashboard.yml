@@ -19,13 +19,31 @@
   register: manifests
   when: inventory_hostname == groups['kube-master'][0]
 
+- name: Import artifacts_dir
+  import_role:
+    name: kubernetes/client
+    defaults_from: main
+
+- name: Copy dashboard template to ansible host
+  ignore_errors: yes
+  copy:
+    src: "{{ kube_config_dir }}/{{ item.item.file }}"
+    dest: "{{ artifacts_dir }}/{{ item.item.file }}"
+    remote_src: yes
+  become: no
+  run_once: yes
+  with_items: "{{ manifests.results }}"
+  when: kubectl_localhost|default(false)
+  tags:
+    - client
+
 - name: Kubernetes Apps | Start dashboard
   kube:
-    name: "{{ item.name }}"
+    name: "{{ item.item.name }}"
     namespace: "kube-system"
     kubectl: "{{ bin_dir }}/kubectl"
-    resource: "{{ item.type }}"
-    filename: "{{ kube_config_dir }}/{{ item.file }}"
+    resource: "{{ item.item.type }}"
+    filename: "{{ kube_config_dir }}/{{ item.item.file }}"
     state: "latest"
   with_items: "{{ manifests.results }}"
   when: inventory_hostname == groups['kube-master'][0]

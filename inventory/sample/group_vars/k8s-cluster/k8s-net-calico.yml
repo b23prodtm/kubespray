@@ -6,7 +6,7 @@
 # peer_with_router: false
 
 # Enables Internet connectivity from containers
-# nat_outgoing: true
+ nat_outgoing: true
 
 # add default ippool name
 # calico_pool_name: "default-pool"
@@ -14,8 +14,8 @@
 # add default ippool CIDR (must be inside kube_pods_subnet, defaults to kube_pods_subnet otherwise)
 # calico_pool_cidr: 1.2.3.4/5
 
-# Global as_num (/calico/bgp/v1/global/as_num)
-# global_as_num: "64512"
+# Global as_num (/calico/bgp/v1/global/as_num) (default 64512 private node)
+ global_as_num: "65400"
 
 # You can set MTU value here. If left undefined or empty, it will
 # not be specified in calico CNI config, so Calico will use built-in

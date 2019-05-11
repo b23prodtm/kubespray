@@ -128,12 +128,14 @@
     - mounts
 
 - name: flush iptables
+  ignore_errors: yes
   iptables:
     table: "{{ item }}"
     flush: yes
   with_items:
     - filter
     - nat
+    - mangle
   when: flush_iptables|bool
   tags:
     - iptables

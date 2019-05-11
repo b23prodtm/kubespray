@@ -72,7 +72,7 @@ kube_users:
 
 # Choose network plugin (cilium, calico, contiv, weave or flannel. Use cni for generic cni plugin)
 # Can also be set to 'cloud', which lets the cloud provider setup appropriate routing
-kube_network_plugin: weave
+kube_network_plugin: calico
 
 # Setting multi_networking to true will install Multus: https://github.com/intel/multus-cni
 kube_network_plugin_multus: false
@@ -98,8 +98,8 @@ kube_apiserver_port: 6443  # (https)
 kube_apiserver_insecure_port: 0  # (disabled)
 
 # Kube-proxy proxyMode configuration.
-# Can be ipvs, iptables
-kube_proxy_mode: iptables
+# Can be ipvs (ingress controller), iptables (behind firewall)
+kube_proxy_mode: ipvs
 
 # A string slice of values which specify the addresses to use for NodePorts.
 # Values may be valid IP blocks (e.g. 1.2.3.0/24, 1.2.3.4/32).
@@ -136,7 +136,7 @@ enable_nodelocaldns: true
 nodelocaldns_ip: 169.254.25.10
 
 # Can be docker_dns, host_resolvconf or none
-resolvconf_mode: host_resolvconf
+resolvconf_mode: docker_dns
 # Deploy netchecker app to verify DNS resolve as an HTTP service
 deploy_netchecker: false
 # Ip address of the kubernetes skydns service
@@ -171,10 +171,14 @@ dynamic_kubelet_configuration_dir: "{{ kubelet_config_dir | default(default_kube
 podsecuritypolicy_enabled: false
 
 # Make a copy of kubeconfig on the host that runs Ansible in {{ inventory_dir }}/artifacts
-# kubeconfig_localhost: false
+kubeconfig_localhost: true
 # Download kubectl onto the host that runs Ansible in {{ bin_dir }}
-# kubectl_localhost: false
+kubectl_localhost: true
 
+# dnsmasq
+# dnsmasq_upstream_dns_servers:
+#  - /resolvethiszone.with/10.0.4.250
+#  - 8.8.8.8
 
 #  Enable creation of QoS cgroup hierarchy, if true top level QoS and pod cgroups are created. (default true)
 # kubelet_cgroups_per_qos: true

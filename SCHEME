@@ -1,0 +1,66 @@
+#    #
+#   #  #    # #####  ######  ####  #####  #####    ##   #   #
+#  #   #    # #    # #      #      #    # #    #  #  #   # #
+###    #    # #####  #####   ####  #    # #    # #    #   #
+#  #   #    # #    # #           # #####  #####  ######   #
+#   #  #    # #    # #      #    # #      #   #  #    #   #
+#    #  ####  #####  ######  ####  #      #    # #    #   #
+
+
+==============
+- ISP ROUTER -
+ _(  )_( )_
+(_ W A N _)
+ (_) (__)
+==============
+ |
+ | Home network
+ |       ,--./,-.
+ |      / #     /
+ L---- |       :                iMac
+ |      \       \
+ |       `._,._,'
+ S          L Ansible - ssh
+ S
+ H
+ | DMZ IP - Bastion Host
+ | (eth0)
+ |         .\V/,
+ |        ()_()_)
+ L ----  (.(_)()_)             raspberrypib+
+          (_(_).)'
+           `'"'`
+            L ufw - netplan - isc-dhcp-server
+  Private   |
+  Network   I
+  (br0)     P
+            V
+            4
+            |
+            L (((( HOSTAPd ))))
+
+            O
+             o
+            o  Gatewayed Host(s)
+          O
+            o
+           o
+
+          etcd
+                                            .\V/,
+         __v_                   Private    ()_()_)
+  K8s   (____\/{  docker        IP        (.(_)()_)      raspberrypia+
+                                           (_(_).)'
+                                            `'"'`
+          Calico                            | (wlan0)
+                                    K 8 s   L (((( wpa_supplicant ))))
+            K
+            8
+            S
+            | (wlan0)
+            L (((( wpa_supplicant ))))
+              .\V/,
+  Private    ()_()_)
+   IP       (.(_)()_)           raspberrypia+
+             (_(_).)'
+              `'"'`
