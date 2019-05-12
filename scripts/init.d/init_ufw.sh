@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-[ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $* 
+[ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh
 while [ "$#" -gt 0 ]; do case $1 in
   -r*|-R*)
@@ -19,6 +19,9 @@ esac; shift; done
 
 logger -st ipv4 "enable ip forwarding v4"
 sudo sed -i /net.ipv4.ip_forward/s/^\#// /etc/sysctl.conf /etc/ufw/sysctl.conf 2> hostapd.log
+[ $(cat hostapd.log > /dev/null) ] && exit 1
+logger -st ipv4 "enable ip forwarding v6"
+sudo sed -i /net.ipv6.conf.all.forwarding/s/^\#// /etc/sysctl.conf /etc/ufw/sysctl.conf 2> hostapd.log
 [ $(cat hostapd.log > /dev/null) ] && exit 1
 logger -st ufw "configure firewall"
 sudo sed -i /DEFAULT_FORWARD_POLICY/s/DROP/ACCEPT/g /etc/default/ufw 2> hostapd.log

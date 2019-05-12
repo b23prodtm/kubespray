@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
-[ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $* 
+[ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh
 yaml='01-hostap.yaml'
 clientyaml='01-cliwpa.yaml'
@@ -29,10 +29,10 @@ auto lo br0
 iface lo inet loopback
 
 allow-hotplug ${INT}
-iface ${INT} inet manual
+iface ${INT} inet dhcp
 
 allow-hotplug wlan0
-iface wlan0 inet manual
+iface wlan0 inet dhcp
 ${MARKER_END}" | sudo tee /etc/network/interfaces
       sudo /etc/init.d/networking restart
     else
@@ -81,7 +81,7 @@ iface wlan0 inet dhcp
   netmask ${MASK}
 # Bridge setup
 auto br0
-iface br0 inet manual
+iface br0 inet dhcp
   address 10.33.0.1
   network 10.33.0.0
   netmask 255.255.255.0
@@ -111,6 +111,8 @@ logger -st netplan "/etc/netplan/$yaml was created"
       addresses: [${NET}.1/${MASKb}, '${NET6}1/${MASKb6}']
   bridges:
     br0:
+      dhcp4: yes
+      dhcp6: yes
       addresses: [10.33.0.1/24, '2001:db8:1:46::1/64']
       nameservers:
         addresses: [10.33.0.1, '2001:db8:1:46::1', 8.8.8.8, 8.8.4.4]
