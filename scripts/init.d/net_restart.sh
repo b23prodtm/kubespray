@@ -16,38 +16,46 @@ else
    printf '%s\n' "[Install]" "WantedBy=multi-user.target" | sudo tee -a /etc/systemd/system/rc-local.service
    sudo systemctl enable rc-local
    # apply once and disable
-   sed -i -e s/"${MARKERS}"//g -e /"^exit"/s/"^"/"${MARKER_BEGIN}\n\
+   if [ -z $CLIENT ]; then
+    sed -i -e s/"${MARKERS}"//g -e /"^exit"/s/"^"/"${MARKER_BEGIN}\n\
 netplan apply\n\
 systemctl restart hostapd\n\
-netplan apply\n\
 ip link set dev wlan0 up\n\
 systemctl restart isc-dhcp-server\n\
 systemctl restart isc-dhcp-server6\n\
 sleep 2
 dhclient\n\
 ${MARKER_END}\n"/ /etc/rc.local
-   logger -st sed "/etc/rc.local added command lines"
+  else
+    sed -i -e s/"${MARKERS}"//g -e /"^exit"/s/"^"/"${MARKER_BEGIN}\n\
+netplan apply\n\
+ip link set dev wlan0 up\n\
+sleep 2
+dhclient\n\
+${MARKER_END}\n"/ /etc/rc.local
+  fi
+logger -st sed "/etc/rc.local added command lines"
    cat /etc/rc.local
 fi
 source ${work_dir}init.d/init_ufw.sh
 case $REBOOT in
   'y'|'Y'*) sudo reboot;;
   *)
-	logger -st sysctl "restarting Access Point"
-	sudo systemctl unmask hostapd.service
-	sudo systemctl enable hostapd.service
+	[ -z $CLIENT ]logger -st sysctl "restarting Access Point"
+	[ -z $CLIENT ]sudo systemctl unmask hostapd.service
+	[ -z $CLIENT ]sudo systemctl enable hostapd.service
 	# FIX driver AP_DISABLED error : first start up interface
 	sudo netplan apply
-	sudo service hostapd start
-	logger -st dhcpd "restart DHCP server"
+	[ -z $CLIENT ]sudo service hostapd start
+	[ -z $CLIENT ]logger -st dhcpd "restart DHCP server"
 	# Restart up interface
 	sudo ip link set dev wlan0 up
-  sudo service isc-dhcp-server restart
-	sudo service isc-dhcp-server6 restart
+  [ -z $CLIENT ]sudo service isc-dhcp-server restart
+	[ -z $CLIENT ]sudo service isc-dhcp-server6 restart
   sleep 2
 	sudo dhclient
-	systemctl status hostapd.service
-	systemctl status isc-dhcp-server.service
-	systemctl status isc-dhcp-server6.service
+	[ -z $CLIENT ]systemctl status hostapd.service
+	[ -z $CLIENT ]systemctl status isc-dhcp-server.service
+	[ -z $CLIENT ]systemctl status isc-dhcp-server6.service
 	exit 0;;
 esac

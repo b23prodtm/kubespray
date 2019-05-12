@@ -20,10 +20,11 @@ Usage: $0 [-r]
     Disable all dhcp (also with dnsmasq) services
   -l <hostname>
     Prints ethernet mac address corresponding to the specified host DHCP lease. \
-    New fixed addresses can be added to /etc/dhcpd/dhcp.conf, /etc/dhcpd/dhcp6.conf."
+    A fixed address option will be added to /etc/dhcpd/dhcp.conf, /etc/dhcpd/dhcp6.conf.
+    Activate it by commenting out the host option."
     exit 1;;
   -l*|--leases*)
-    cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | awk -F' ' 'FNR==3 {print $3}';;    
+    export LEASE=$(cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | grep -m1 "hardware ethernet" | awk -F' ' '{print $3}');;
   *);;
 esac; shift; done
 echo -e "option domain-name-servers ${NET}.1;
@@ -44,7 +45,7 @@ option broadcast-address ${NET}.0; # dhcpd
 range ${NET}.${NET_start} ${NET}.${NET_end};
 # Example for a fixed host address
 #      host raspberrypia {
-#      hardware ethernet B8:27:EB:52:B3:F2;
+#      hardware ethernet ${LEASE} # 00:00:00:00:00:00;
 #        fixed-address ${NET}.15; }
 }
 " | sudo tee /etc/dhcp/dhcpd.conf
@@ -64,7 +65,7 @@ subnet6 ${NET6}0/${MASKb6} {
 range6 ${NET6}${NET_start} ${NET6}${NET_end};
 # Example for a fixed host address
 #      host raspberrypia {
-#      hardware ethernet B8:27:EB:52:B3:F2;
+#      hardware ethernet ${LEASE} # 00:00:00:00:00:00;
 #        fixed-address ${NET6}15; }
 }
 " | sudo tee /etc/dhcp/dhcpd6.conf
