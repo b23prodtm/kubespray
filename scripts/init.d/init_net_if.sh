@@ -77,6 +77,7 @@ iface ${INT} inet dhcp
 allow-hotplug wlan0
 iface wlan0 inet dhcp
   address ${NET}.1
+  gateway ${NET}.1
   network ${NET}.0
   netmask ${MASK}
 # Bridge setup
@@ -109,6 +110,8 @@ logger -st netplan "/etc/netplan/$yaml was created"
         \"\":
           password:
       addresses: [${NET}.1/${MASKb}, '${NET6}1/${MASKb6}']
+      gateway4: ${NET}.1
+      gateway6: '${NET6}1'
   bridges:
     br0:
       dhcp4: yes
@@ -126,7 +129,7 @@ if [ -f /etc/init.d/networking ]; then
 else
   [ $(sudo netplan try --timeout 12) 2> /dev/null ] && exit 1
 fi
-logger -st dhclient "redeem ip address ${INT}"
-sudo dhclient ${INT}
 logger -st ip "wakeup wlan0"
 sudo ip link set dev wlan0 up
+logger -st ip "redeem internet bridge"
+sudo dhclient

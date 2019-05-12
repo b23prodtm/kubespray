@@ -20,11 +20,11 @@ else
 netplan apply\n\
 systemctl restart hostapd\n\
 netplan apply\n\
-dhclient ${INT}\n\
 ip link set dev wlan0 up\n\
-dhclient br0\n\
 systemctl restart isc-dhcp-server\n\
 systemctl restart isc-dhcp-server6\n\
+sleep 2
+dhclient\n\
 ${MARKER_END}\n"/ /etc/rc.local
    logger -st sed "/etc/rc.local added command lines"
    cat /etc/rc.local
@@ -39,14 +39,13 @@ case $REBOOT in
 	# FIX driver AP_DISABLED error : first start up interface
 	sudo netplan apply
 	sudo service hostapd start
-	sleep 1
 	logger -st dhcpd "restart DHCP server"
 	# Restart up interface
-	sudo dhclient ${INT}
 	sudo ip link set dev wlan0 up
-	sudo dhclient br0
-	sudo service isc-dhcp-server restart
+  sudo service isc-dhcp-server restart
 	sudo service isc-dhcp-server6 restart
+  sleep 2
+	sudo dhclient
 	systemctl status hostapd.service
 	systemctl status isc-dhcp-server.service
 	systemctl status isc-dhcp-server6.service
