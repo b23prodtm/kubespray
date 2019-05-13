@@ -20,7 +20,8 @@ Usage: $0 [-r]
     Disable all dhcp (also with dnsmasq) services
   -l <hostname>
     Prints ethernet mac address corresponding to the specified host DHCP lease. \
-    New fixed addresses can be added to /etc/dhcpd/dhcp.conf, /etc/dhcpd/dhcp6.conf."
+    A fixed address option will be added to /etc/dhcpd/dhcp.conf, /etc/dhcpd/dhcp6.conf.
+    Activate it by commenting out the host option."
     exit 1;;
   -l*|--leases*)
     export LEASE_HOST=$2 LEASE=$(cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | grep -m1 "hardware ethernet" | awk -F' ' '{print $3}');;
