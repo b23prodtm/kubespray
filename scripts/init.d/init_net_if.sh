@@ -75,7 +75,7 @@ iface ${INT} inet dhcp
  network ${INTNET}.0
 
 allow-hotplug wlan0
-iface wlan0 inet dhcp
+iface wlan0 inet manual
   address ${NET}.1
   gateway ${NET}.1
   network ${NET}.0
@@ -104,8 +104,6 @@ logger -st netplan "/etc/netplan/$yaml was created"
       dhcp6: no
   wifis:
     wlan0:
-      dhcp4: yes
-      dhcp6: yes
       access-points:
         \"\":
           password:

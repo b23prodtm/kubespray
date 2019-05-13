@@ -23,10 +23,10 @@ Usage: $0 [-r]
     New fixed addresses can be added to /etc/dhcpd/dhcp.conf, /etc/dhcpd/dhcp6.conf."
     exit 1;;
   -l*|--leases*)
-    cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | awk -F' ' 'FNR==3 {print $3}';;    
+    export LEASE_HOST=$2 LEASE=$(cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | grep -m1 "hardware ethernet" | awk -F' ' '{print $3}');;
   *);;
 esac; shift; done
-echo -e "option domain-name-servers ${NET}.1;
+echo -e "option domain-name-servers ${NET}.1, 8.8.8.8, 8.8.4.4;
 
 default-lease-time 600;
 max-lease-time 7200;
@@ -43,12 +43,12 @@ option subnet-mask ${MASK};
 option broadcast-address ${NET}.0; # dhcpd
 range ${NET}.${NET_start} ${NET}.${NET_end};
 # Example for a fixed host address
-#      host raspberrypia {
-#      hardware ethernet B8:27:EB:52:B3:F2;
+#      host ${LEASE_HOST} { # host hostname
+#      hardware ethernet ${LEASE} # hardware ethernet 00:00:00:00:00:00;
 #        fixed-address ${NET}.15; }
 }
 " | sudo tee /etc/dhcp/dhcpd.conf
-sudo cat /etc/dhcp/dhcpd.conf
+[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/s/^\#// -e /"hardware ethernet"/s/^\#// -e /"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf
 echo -e "option dhcp6.name-servers ${NET6}1;
 
 default-lease-time 600;
@@ -63,13 +63,14 @@ subnet6 ${NET6}0/${MASKb6} {
 #option dhcp6.domain-name "wifi.localhost";
 range6 ${NET6}${NET_start} ${NET6}${NET_end};
 # Example for a fixed host address
-#      host raspberrypia {
-#      hardware ethernet B8:27:EB:52:B3:F2;
+#      host ${LEASE_HOST} { # host hostname
+#      hardware ethernet ${LEASE} # hardware ethernet 00:00:00:00:00:00;
 #        fixed-address ${NET6}15; }
 }
 " | sudo tee /etc/dhcp/dhcpd6.conf
-sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"wlan0\"/" /etc/default/isc-dhcp-server
-sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"wlan0\"/" /etc/default/isc-dhcp-server
+[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/s/^\#// -e /"hardware ethernet"/s/^\#// -e /"fixed-address"/s/^\#// /etc/dhcp/dhcpd6.conf
+sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"br0\"/" /etc/default/isc-dhcp-server
+sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"br0\"/" /etc/default/isc-dhcp-server
 sudo cat /etc/default/isc-dhcp-server
 sleep 1
 logger -st dhcpd "start DHCP server"
