@@ -13,10 +13,12 @@ defintnet = ip.ip_network('192.168.0.0/24')
 defintnet6 = ip.ip_network('2a01:e0a:16b:dc30::0/64')
 myenv = dict()
 def parse_args (argv):
+    mb = "# BEGIN GENERATED hostapd"
+    me = "# END GENERATED hostapd"
     markers = {
-        "MARKER_BEGIN":"# BEGIN GENERATED hostapd",
-        "MARKER_END":"# END GENERATED hostapd",
-        "MARKERS":"${MARKER_BEGIN}\\n.*\\n.*${MARKER_END}"
+        "MARKER_BEGIN":mb,
+        "MARKER_END":me,
+        "MARKERS":"/'" + mb + "'/,/'" + me + "'/"
     }
     myenv.update(markers)
     defaults = {
@@ -113,7 +115,7 @@ def write_exports(envdict):
     f = open(path, "w")
     f.write("#!/usr/bin/env bash\nexport")
     for k,v in myenv.items():
-        f.write(" '{}'='{}'".format(k,v))
+        f.write(" '{}'=\"{}\"".format(k,v))
     f.close()
     os.chmod(path, 0o755)
 
