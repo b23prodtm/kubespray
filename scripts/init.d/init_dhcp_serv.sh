@@ -49,7 +49,7 @@ range ${NET}.${NET_start} ${NET}.${NET_end};
 #        fixed-address ${NET}.15; }
 }
 " | sudo tee /etc/dhcp/dhcpd.conf
-[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/s/^\#// -e /"hardware ethernet"/s/^\#// -e /"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf
+[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf
 echo -e "option dhcp6.name-servers ${NET6}1;
 
 default-lease-time 600;
@@ -69,9 +69,9 @@ range6 ${NET6}${NET_start} ${NET6}${NET_end};
 #        fixed-address ${NET6}15; }
 }
 " | sudo tee /etc/dhcp/dhcpd6.conf
-[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/s/^\#// -e /"hardware ethernet"/s/^\#// -e /"fixed-address"/s/^\#// /etc/dhcp/dhcpd6.conf
-sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"br0\"/" /etc/default/isc-dhcp-server
-sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"br0\"/" /etc/default/isc-dhcp-server
+[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd6.conf
+sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"wlan0\"/" /etc/default/isc-dhcp-server
+sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"wlan0\"/" /etc/default/isc-dhcp-server
 sudo cat /etc/default/isc-dhcp-server
 sleep 1
 logger -st dhcpd "start DHCP server"

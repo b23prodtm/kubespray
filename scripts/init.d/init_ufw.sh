@@ -34,7 +34,7 @@ echo -e "${MARKER_BEGIN}\\n\
 \\n\
 # Forward traffic from wlan0 through eth0.\\n\
 -A POSTROUTING -s ${NET}.0/${MASKb} -o ${INT} -j MASQUERADE\\n\
--A POSTROUTING -s ${NET6}0/${MASKb6} -o ${INT} -j MASQUERADE\\n\
+#-A POSTROUTING -s ${NET6}0/${MASKb6} -o ${INT} -j MASQUERADE\\n\
 \\n\
 # dont delete the COMMIT line or these nat table rules wont be processed\\n\
 COMMIT\\n\
@@ -45,7 +45,7 @@ logger -st ufw "add packet ip forwarding"
 echo -e "${MARKER_BEGIN}\\n\
 -A ufw-before-forward -m state --state RELATED,ESTABLISHED -j ACCEPT\\n\
 -A ufw-before-forward -i wlan0 -s ${NET}.0/${MASKb} -o ${INT} -m state --state NEW -j ACCEPT\\n\
--A ufw-before-forward -i wlan0 -s ${NET6}0/${MASKb6} -o ${INT} -m state --state NEW -j ACCEPT\\n\
+#-A ufw-before-forward -i wlan0 -s ${NET6}0/${MASKb6} -o ${INT} -m state --state NEW -j ACCEPT\\n\
 ${MARKER_END}" | sudo tee /tmp/input.rules
 sudo sed -i -e /'^\# End required lines'/r/tmp/input.rules /etc/ufw/before.rules
 sleep 1
