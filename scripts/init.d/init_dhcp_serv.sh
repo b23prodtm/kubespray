@@ -2,6 +2,9 @@
 export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 [ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh
+routers="option routers ${NET}.1; #hostapd wlan0"
+nameservers="${NET}.1"
+nameservers6="${NET6}1"
 while [ "$#" -gt 0 ]; do case $1 in
   -r*|-R*)
     sudo systemctl disable dnsmasq.service
@@ -25,9 +28,15 @@ Usage: $0 [-r]
     exit 1;;
   -l*|--leases*)
     export LEASE_HOST=$2 LEASE=$(cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | grep -m1 "hardware ethernet" | awk -F' ' '{print $3}');;
-  *);;
+  --dns)
+    nameservers="${nameservers}, $2";;
+  --dns6)
+    nameservers6="${nameservers6}, $2";;
+  --router)
+    routers="option routers $2;";;
+    *);;
 esac; shift; done
-echo -e "option domain-name-servers ${NET}.1, 8.8.8.8, 8.8.4.4;
+echo -e "option domain-name-servers ${nameservers};
 
 default-lease-time 600;
 max-lease-time 7200;
@@ -39,7 +48,7 @@ log-facility local7;
 subnet ${INTNET}.0 netmask ${INTMASK} {}
 subnet ${NET}.0 netmask ${MASK} {
 #option domain-name "wifi.localhost";
-option routers ${NET}.1; #hostapd wlan0
+${routers}
 option subnet-mask ${MASK};
 option broadcast-address ${NET}.0; # dhcpd
 range ${NET}.${NET_start} ${NET}.${NET_end};
@@ -50,7 +59,7 @@ range ${NET}.${NET_start} ${NET}.${NET_end};
 }
 " | sudo tee /etc/dhcp/dhcpd.conf
 [ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf
-echo -e "option dhcp6.name-servers ${NET6}1;
+echo -e "option dhcp6.name-servers ${nameservers6};
 
 default-lease-time 600;
 max-lease-time 7200;

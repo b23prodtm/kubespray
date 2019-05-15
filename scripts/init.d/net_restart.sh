@@ -37,6 +37,7 @@ ${MARKER_END}\\n'/ /etc/rc.local"
 logger -st sed "/etc/rc.local added command lines"
    cat /etc/rc.local
 fi
+logger -st ufw  "enable ip forwarding (internet connectivity)"
 source ${work_dir}init.d/init_ufw.sh
 case $REBOOT in
   'y'|'Y'*) sudo reboot;;
@@ -50,7 +51,7 @@ case $REBOOT in
 	[ -z $CLIENT ] && logger -st dhcpd "restart DHCP server"
 	# Restart up interface
 	sudo ip link set dev wlan0 up
-  	[ -z $CLIENT ] && sudo service isc-dhcp-server restart
+  [ -z $CLIENT ] && sudo service isc-dhcp-server restart
 	[ -z $CLIENT ] && sudo service isc-dhcp-server6 restart
   sleep 2
 	sudo dhclient
