@@ -103,17 +103,18 @@ fragm_threshold=2346
 [ -z $CLIENT ] && sudo sed -i -e /DAEMON_OPTS=/s/^\#// -e "/DAEMON_OPTS=/s/=\".*\"/=\"-i wlan0\"/" /etc/default/hostapd 2> hostapd.log
 [ -z $CLIENT ] && [ $(cat hostapd.log > /dev/null) ] && exit 1
 [ -z $CLIENT ] && sudo cat /etc/default/hostapd | grep "DAEMON"
-[ -z $CLIENT ] && read -p "Do you want to Install Bridged Internet Sharing now [PRESS ENTER TO CANCEL/n/y] ?" SHARE
+[ -z $CLIENT ] && read -p "Do you wish to install Bridge Mode \
+[PRESS ENTER TO START in Router mode now / no to use DNSMasq (old) / yes for Bridge mode] ?" SHARE
 if [ -z $CLIENT ]; then case $SHARE in
 #
 # Bridge Mode
 #
-   'y'|'Y'*)
+   'y'*|'Y'*)
       logger -st brctl "share internet connection from ${INT} to wlan0 over bridge"
       sudo sed -i /bridge=br0/s/^\#// /etc/hostapd/hostapd.conf
-      source ${work_dir}init.d/init_net_if.sh --dns 8.8.8.8 --dns 9.9.9.9 --bridge
+      source ${work_dir}init.d/init_net_if.sh --wifi '' '' --dns 8.8.8.8 --dns 9.9.9.9 --bridge
       ;;
-  'n'|'N'*)
+  'n'*|'N'*)
     [ -z $(which dnsmasq) ] && sudo apt-get -y install dnsmasq
     logger -st dnsmasq "configure a DNS server as a Service"
     echo -e "bogus-priv
@@ -130,19 +131,19 @@ dhcp-range=${NET}.15,${NET}.100,${MASK},${MASKb}h
     sudo modprobe ipt_MASQUERADE
     sleep 1
     logger -st network "rendering configuration for dnsmasq mode"
-    source ${work_dir}init.d/init_net_if.sh --dns ${NET}.1 --dns ${NET6}1
+    source ${work_dir}init.d/init_net_if.sh --wifi '' ''
     sudo systemctl unmask dnsmasq.service
     sudo systemctl enable dnsmasq.service
     sudo service dnsmasq start
     ;;
   *)
     logger -st network "rendering configuration for router mode"
-    source ${work_dir}init.d/init_net_if.sh --router ${NET}.1 --router6 ${NET6}1
+    source ${work_dir}init.d/init_net_if.sh --wifi '' '' --dns 8.8.8.8 --dns 9.9.9.9
   ;;
 esac;
     logger -st dhcpd  "configure dynamic dhcp addresses ${NET}.${NET_start}-${NET_end}"
     source ${work_dir}init.d/init_dhcp_serv.sh --dns 8.8.8.8 --dns 9.9.9.9 --router ${NET}.1 --router6 ${NET6}1
 else
-  source ${work_dir}init.d/init_net_if.sh $CLIENT
+  source ${work_dir}init.d/init_net_if.sh --wifi $SSID $PAWD
 fi
 source ${work_dir}init.d/net_restart.sh $CLIENT

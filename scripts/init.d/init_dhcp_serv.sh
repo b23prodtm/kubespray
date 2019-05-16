@@ -34,7 +34,8 @@ Usage: $0 [-r]
     nameservers6="${nameservers6}, $2";;
   --router)
     routers="option routers $2;";;
-    *);;
+    *)
+    echo -e "$0: Unknown option $1";;
 esac; shift; done
 echo -e "option domain-name-servers ${nameservers};
 
@@ -52,13 +53,13 @@ ${routers}
 option subnet-mask ${MASK};
 option broadcast-address ${NET}.0; # dhcpd
 range ${NET}.${NET_start} ${NET}.${NET_end};
-# Example for a fixed host address
+# Example for a fixed host address try $0 --leases <hostname>
 #      host ${LEASE_HOST} { # host hostname
 #      hardware ethernet ${LEASE} # hardware ethernet 00:00:00:00:00:00;
 #        fixed-address ${NET}.15; }
 }
 " | sudo tee /etc/dhcp/dhcpd.conf
-[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf
+[ ! -z ${LEASE} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf && cat /etc/dhcp/dhcpd.conf | grep -B3 "fixed-address"
 echo -e "option dhcp6.name-servers ${nameservers6};
 
 default-lease-time 600;
@@ -72,13 +73,13 @@ subnet6 ${INTNET6}0/${INTMASKb6} {}
 subnet6 ${NET6}0/${MASKb6} {
 #option dhcp6.domain-name "wifi.localhost";
 range6 ${NET6}${NET_start} ${NET6}${NET_end};
-# Example for a fixed host address
-#      host ${LEASE_HOST} { # host hostname
+# Example for a fixed host address try $0 --leases <hostname>
+#      host ${LEASE_HOST} { # host hostname (dhcp-leases-list)
 #      hardware ethernet ${LEASE} # hardware ethernet 00:00:00:00:00:00;
 #        fixed-address ${NET6}15; }
 }
 " | sudo tee /etc/dhcp/dhcpd6.conf
-[ ! -z ${LEASE_HOST} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd6.conf
+[ ! -z ${LEASE} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd6.conf && cat /etc/dhcp/dhcpd6.conf | grep -B3 "fixed-address"
 sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"wlan0\"/" /etc/default/isc-dhcp-server
 sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"wlan0\"/" /etc/default/isc-dhcp-server
 sudo cat /etc/default/isc-dhcp-server

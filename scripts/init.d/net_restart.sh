@@ -7,6 +7,7 @@ read -p "Do you want to reboot now [y/N] ?" REBOOT
 if [ -f /etc/init.d/networking ]; then
    sudo /etc/init.d/networking restart
 else
+   sudo netplan try --timeout 12
    logger -st 'rc.local' 'Work around fix netplan apply on reboot'
    if [ ! -f /etc/rc.local ]; then
       printf '%s\n' "#!/bin/bash" "exit 0" | sudo tee /etc/rc.local
@@ -51,9 +52,9 @@ case $REBOOT in
 	[ -z $CLIENT ] && logger -st dhcpd "restart DHCP server"
 	# Restart up interface
 	sudo ip link set dev wlan0 up
-  [ -z $CLIENT ] && sudo service isc-dhcp-server restart
+	[ -z $CLIENT ] && sudo service isc-dhcp-server restart
 	[ -z $CLIENT ] && sudo service isc-dhcp-server6 restart
-  sleep 2
+	sleep 2
 	sudo dhclient
 	[ -z $CLIENT ] && systemctl status hostapd.service
 	[ -z $CLIENT ] && systemctl status isc-dhcp-server.service
