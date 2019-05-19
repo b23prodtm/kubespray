@@ -30,16 +30,18 @@ if [[ "$#" -gt 1 ]]; then IPS=$@; else while [[ -z $IPS ]]; do
   fi
 done; fi
 logger -st kubespray "IPS=(${IPS[@]})\n"
-YAML=inventory/mycluster/hosts.yaml
-INI=inventory/mycluster/hosts.ini
+INV=inventory/mycluster
+YAML=$INV/inventory.yaml
+INI=$INV/inventory.ini
+GROUPS=$INV/group_vars
 logger -st kubespray "****** K8s ansible : Generate $INI and $YAML ******"
-python contrib/inventory_builder/inventory.py ${IPS[@]} print_cfg
+python3 contrib/inventory_builder/inventory.py ${IPS[@]} print_cfg
 if [ $(cfrm_act "Regenerate the $INI file, are the machines up and running" 'n') > /dev/null ]; then
-  CONFIG_FILE=$INI python contrib/inventory_builder/inventory.py ${IPS[@]} print_cfg > $YAML
+  CONFIG_FILE=$INI python3 contrib/inventory_builder/inventory.py ${IPS[@]} print_cfg > $YAML
 fi
-cat inventory/mycluster/group_vars/all/all.yml
+cat $GROUPS/all/all.yml
 [ $(cfrm_act "the options" 'y') > /dev/null ] || exit 0
-cat inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml
+cat $GROUPS/k8s-cluster/k8s-cluster.yml
 [ $(cfrm_act "the kubernetes configuration" 'y') > /dev/null ] || exit 0
 
 declare PI=ubuntu # replace 'pi' with 'ubuntu' or any other user
@@ -66,25 +68,7 @@ for ip in ${IPS[@]}; do
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367 &
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8becf1637ad8c79d &
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys c793bfa2fa577f07 &
-  logger -st docker-$ip "allow https repository";
-  ssh $PI@$ipsudo apt-get install \
-      apt-transport-https \
-      ca-certificates \
-      curl \
-      gnupg-agent \
-      software-properties-common;
-  logger -st docker-$ip "add docker repository packages";
-  ssh $PI@$ip sudo add-apt-repository \
-       "deb [arch=arm64] https://download.docker.com/linux/ubuntu \
-       bionic \
-       stable";
-  logger -st docker-$ip "add docker repository key";
-  ssh $PI@$ipsudo "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
-  logger -st docker-$ip "remove old docker-ce";
-  ssh $PI@$ip sudo apt-get remove docker docker-engine docker.io containerd runc;
-  logger -st docker-$ip "get docker-ce for ubuntu bionic";
-  ssh $PI@$ip "sudo apt-get update && sudo apt-get install docker-ce -y";
-  ssh $PI@$ip sudo apt-get install docker-ce-cli containerd.io;
+  scripts/my_playbook.sh --docker-setup $PI@$ip $GROUPS
 done
 cat roles/kubernetes/preinstall/tasks/0020-verify-settings.yml | grep -b2 'that: ansible_memtotal_mb'
 logger -st kubespray "****** K8s ansible : Run Playbook cluster.yml ******"

@@ -10,8 +10,8 @@ then
     [ $(which sw_vers) > /dev/null ] && sw_vers
     exit 1
 fi
-[ "$#" -lt 2 ] && python3 library/hap-wiz-env.py --help && exit 1
 export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
+[ "$#" -lt 2 ] && python3 ${work_dir}../library/hap-wiz-env.py --help && exit 1
 python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh
 echo "Set Private Network $NET.0/$MASK"
