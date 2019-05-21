@@ -26,16 +26,14 @@ function setup_docker() {
   logger -st ssh "ssh session with $1"
   ssh $1 'logger -st docker "allow https repository";
   sudo apt-get install \
-      apt-transport-https \
+      "apt-transport-https \
       ca-certificates \
       curl \
       gnupg-agent \
-      software-properties-common;
+      software-properties-common &";
   logger -st docker-$"add docker repository packages";
   sudo add-apt-repository \
-       "deb [arch=arm64] https://download.docker.com/linux/ubuntu \
-       bionic \
-       stable";
+       "deb [arch=arm64] https://download.docker.com/linux/ubuntu bionic stable &";
   logger -st docker"add docker repository key";
   sudo "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
   logger -st docker"remove old docker-ce";
