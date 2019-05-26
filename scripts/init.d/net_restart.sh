@@ -25,14 +25,14 @@ ip link set dev wlan0 up\\n\
 systemctl restart isc-dhcp-server\\n\
 systemctl restart isc-dhcp-server6\\n\
 sleep 2\\n\
-dhclient\\n\
+dhclient ${INT}\\n\
 ${MARKER_END}\\n'/ /etc/rc.local"
   else
     bash -c "sudo sed -i -e ${MARKERS}d -e /^exit/s/^/'${MARKER_BEGIN}\\n\
 netplan apply\\n\
 ip link set dev wlan0 up\\n\
 sleep 2\\n\
-dhclient\\n\
+dhclient wlan0\\n\
 ${MARKER_END}\\n'/ /etc/rc.local"
   fi
 logger -st sed "/etc/rc.local added command lines"
@@ -55,7 +55,8 @@ case $REBOOT in
 	[ -z $CLIENT ] && sudo service isc-dhcp-server restart
 	[ -z $CLIENT ] && sudo service isc-dhcp-server6 restart
 	sleep 2
-	sudo dhclient
+	[ -z $CLIENT ] && sudo dhclient ${INT}
+	[ ! -z $CLIENT ] && sudo dhclient wlan0
 	[ -z $CLIENT ] && systemctl status hostapd.service
 	[ -z $CLIENT ] && systemctl status isc-dhcp-server.service
 	[ -z $CLIENT ] && systemctl status isc-dhcp-server6.service
