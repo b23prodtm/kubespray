@@ -5,6 +5,15 @@ source .hap-wiz-env.sh
 routers="option routers ${NET}.1; #hostapd wlan0"
 nameservers=$(systemd-resolve -6 --status | grep 'DNS Servers:' | awk '/(\w*\.){3}/{print $3}' | head -n 1)
 nameservers6="'$(systemd-resolve -6 --status | grep 'DNS Servers:' | awk '/(\w*:){2}/{print $3}' | head -n 1)'"
+function lease_blk() {
+  address=$1
+echo -e "#${MARKER_BEGIN}
+## Example for a fixed host address try $0 --leases <hostname> [host_number]
+#      host ${lease_host} { # host hostname (dhcp-leases-list)
+#      hardware ethernet ${lease} # hardware ethernet 00:00:00:00:00:00 (/var/lib/dhcp/dhcpd.leases);
+#        fixed-address ${address}; }
+#${MARKER_END}"
+}
 while [ "$#" -gt 0 ]; do case $1 in
   -r*|-R*)
     sudo systemctl disable dnsmasq.service
@@ -17,7 +26,7 @@ while [ "$#" -gt 0 ]; do case $1 in
   -h*|--help)
     echo "
 Usage: $0 [-r]
-       $0 [-l, --leases <hostname>]
+       $0 [-l, --leases <hostname> [host_number]]
   Initializes DHCP services (without dnsmasq)
   -r
     Disable all dhcp (also with dnsmasq) services
@@ -27,7 +36,11 @@ Usage: $0 [-r]
     Activate it by commenting out the host option."
     exit 1;;
   -l*|--leases*)
-    export LEASE_HOST=$2 LEASE=$(cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | grep -m1 "hardware ethernet" | awk -F' ' '{print $3}');;
+    lease_host=$2; lease_add=$3; lease=$(cat /var/lib/dhcp/dhcpd.leases | grep -C4 $2 | grep -m1 "hardware ethernet" | awk -F' ' '{print $3}')
+    [ -z $3 ] && lease_add=${NET_start}
+    [ ! -z ${lease} ] && sudo sed -i -e ${MARKERS}s/^\#// -e ${MARKER_BEGIN}d -e ${MARKER_END}d -e \$s/}// -e \$a\ "$(lease_blk $NET.$lease_add)}" /etc/dhcp/dhcpd.conf && cat /etc/dhcp/dhcpd.conf | grep -B3 "fixed-address"
+    [ ! -z ${lease} ] && sudo sed -i -e ${MARKERS}s/^\#// -e ${MARKER_BEGIN}d -e ${MARKER_END}d -e \$s/}// -e \$a\ "$(lease_blk $NET6$lease_add)}" /etc/dhcp/dhcpd6.conf && cat /etc/dhcp/dhcpd6.conf | grep -B3 "fixed-address"
+    return;;
   --dns)
     nameservers="${nameservers}, $2";;
   --dns6)
@@ -53,13 +66,8 @@ ${routers}
 option subnet-mask ${MASK};
 option broadcast-address ${NET}.0; # dhcpd
 range ${NET}.${NET_start} ${NET}.${NET_end};
-# Example for a fixed host address try $0 --leases <hostname>
-#      host ${LEASE_HOST} { # host hostname
-#      hardware ethernet ${LEASE} # hardware ethernet 00:00:00:00:00:00;
-#        fixed-address ${NET}.15; }
-}
-" | sudo tee /etc/dhcp/dhcpd.conf
-[ ! -z ${LEASE} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd.conf && cat /etc/dhcp/dhcpd.conf | grep -B3 "fixed-address"
+${lease_blk}
+}" | sudo tee /etc/dhcp/dhcpd.conf
 echo -e "option dhcp6.name-servers ${nameservers6};
 
 default-lease-time 600;
@@ -73,13 +81,8 @@ subnet6 ${INTNET6}0/${INTMASKb6} {}
 subnet6 ${NET6}0/${MASKb6} {
 #option dhcp6.domain-name "wifi.localhost";
 range6 ${NET6}${NET_start} ${NET6}${NET_end};
-# Example for a fixed host address try $0 --leases <hostname>
-#      host ${LEASE_HOST} { # host hostname (dhcp-leases-list)
-#      hardware ethernet ${LEASE} # hardware ethernet 00:00:00:00:00:00;
-#        fixed-address ${NET6}15; }
-}
-" | sudo tee /etc/dhcp/dhcpd6.conf
-[ ! -z ${LEASE} ] && sudo sed -i -e /"host hostname"/,/"fixed-address"/s/^\#// /etc/dhcp/dhcpd6.conf && cat /etc/dhcp/dhcpd6.conf | grep -B3 "fixed-address"
+${lease_blk6}
+}" | sudo tee /etc/dhcp/dhcpd6.conf
 sudo sed -i -e "s/INTERFACESv4=\".*\"/INTERFACESv4=\"wlan0\"/" /etc/default/isc-dhcp-server
 sudo sed -i -e "s/INTERFACESv6=\".*\"/INTERFACESv6=\"wlan0\"/" /etc/default/isc-dhcp-server
 sudo cat /etc/default/isc-dhcp-server
