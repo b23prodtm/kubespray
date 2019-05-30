@@ -3,8 +3,8 @@ export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 [ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh
 routers="option routers ${NET}.1; #hostapd wlan0"
-nameservers="${NET}.1"
-nameservers6="${NET6}1"
+nameservers=$(systemd-resolve -6 --status | grep 'DNS Servers:' | awk '/(\w*\.){3}/{print $3}' | head -n 1)
+nameservers6="'$(systemd-resolve -6 --status | grep 'DNS Servers:' | awk '/(\w*:){2}/{print $3}' | head -n 1)'"
 while [ "$#" -gt 0 ]; do case $1 in
   -r*|-R*)
     sudo systemctl disable dnsmasq.service

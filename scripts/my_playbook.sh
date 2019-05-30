@@ -24,23 +24,23 @@ function setup_docker() {
   set_yml_vars $2/all/all.yml "download_container" "true"
   set_yml_vars $2/k8s-cluster/k8s-cluster.yml "etcd_deployment_type" "docker" "kubelet_deployment_type" "host" "container_manager" "docker"
   logger -st ssh "ssh session with $1"
-  ssh $1 'logger -st docker "allow https repository";
-  sudo apt-get install \
-      "apt-transport-https \
+  ssh $1 logger -st docker "allow https repository"
+  ssh $1 sudo apt-get install \
+      apt-transport-https \
       ca-certificates \
       curl \
       gnupg-agent \
-      software-properties-common &";
-  logger -st docker-$"add docker repository packages";
-  sudo add-apt-repository \
-       "deb [arch=arm64] https://download.docker.com/linux/ubuntu bionic stable &";
-  logger -st docker"add docker repository key";
-  sudo "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -";
-  logger -st docker"remove old docker-ce";
-  sudo apt-get remove docker docker-engine docker.io containerd runc;
-  logger -st docker"get docker-ce for ubuntu bionic";
-  sudo apt-get update && sudo apt-get install docker-ce -y";
-  sudo apt-get install docker-ce-cli containerd.io;' || echo "Usage: $0 --docker-setup user@host inventory/path/to/group_vars"
+      software-properties-common -y &
+  ssh $1 logger -st docker "add docker repository packages"
+  ssh $1 sudo add-apt-repository \
+'deb https://download.docker.com/linux/ubuntu bionic stable' &
+  ssh $1 logger -st docker "add docker repository key"
+  ssh $1 sudo "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+  ssh $1 logger -st docker "remove old docker-ce"
+  ssh $1 sudo apt-get remove docker docker-engine docker.io containerd runc -y 
+  ssh $1 logger -st docker "get docker-ce for ubuntu bionic"
+  ssh $1 sudo apt-get update && sudo apt-get install docker-ce -y
+  ssh $1 sudo apt-get install docker-ce-cli containerd.io -y
 }
 function setup_firewall() {
   source my_firewall.sh $*

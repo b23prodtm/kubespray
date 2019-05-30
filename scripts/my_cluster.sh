@@ -55,26 +55,26 @@ cat $GVARS/k8s-cluster/k8s-cluster.yml
 
 declare PI=ubuntu # replace 'pi' with 'ubuntu' or any other user
 for ip in ${IPS[@]}; do
-  logger -st kubespray-$ip "****** K8s ip : $PI@$ip ******";
-  ssh-copy-id $PI@$ip;
-  [ ! -z $BASTION ] && ssh $PI@$BASTION ssh-copy-id $PI@$pi
-  [ ! -z $BASTION ] && ssh -W $ip:22 -q $PI@$BASTION logger -st ssh-bastion "login success"
-  logger -st kubespray-$ip "configure sshd";
-  ssh $PI@$ip "sudo echo 'PermitRootLogin yes' | sudo tee -a /etc/ssh/sshd_config";
-  ssh $PI@$ip sudo cat /etc/ssh/sshd_config | grep PermitRootLogin;
-  logger -st kubespray-$ip "install go";
-  ssh $PI@$ip sudo apt-get install golang -y;
-  logger -st kubespray-$ip "trusted repository";
+  logger -st kubespray-$ip "****** K8s ip : $PI@$ip ******"
+  ssh-copy-id $PI@$ip
+  [ ! -z $BASTION ] && [ ! $BASTION == "$ip" ] && ssh $PI@$BASTION ssh-copy-id $PI@$ip
+  [ ! -z $BASTION ] &&  [ ! $BASTION == "$ip" ] && ssh -W $ip:22 -q $PI@$BASTION logger -st ssh-bastion "login success"
+  logger -st kubespray-$ip "configure sshd"
+  ssh $PI@$ip "sudo echo 'PermitRootLogin yes' | sudo tee -a /etc/ssh/sshd_config"
+  ssh $PI@$ip sudo cat /etc/ssh/sshd_config | grep PermitRootLogin
+  logger -st kubespray-$ip "install go"
+  ssh $PI@$ip sudo apt-get install golang -y
+  logger -st kubespray-$ip "trusted repository"
   ssh $PI@$ip sudo add-apt-repository \
-       "deb [arch=arm64] http://ppa.launchpad.net/ansible/ansible/ubuntu bionic main &";
+'deb http://ppa.launchpad.net/ansible/ansible/ubuntu bionic main' &
   ssh $PI@$ip sudo add-apt-repository \
-       "deb [arch=arm64] http://ppa.launchpad.net/projectatomic/ppa/ubuntu bionic main &";
+'deb http://ppa.launchpad.net/projectatomic/ppa/ubuntu bionic main' &
   ssh $PI@$ip sudo add-apt-repository \
-       "deb [arch=arm64] http://ppa.launchpad.net/alexlarsson/flatpak/ubuntu bionic main &";
-  logger -st kubespray-$ip "add kube user into ubuntu group";
-  ssh $PI@$ip sudo usermod -a -G ubuntu kube;
-  logger -st kubespray-$ip "disable ubuntu firewall";
-  ssh $PI@$ip sudo ufw disable;
+'deb http://ppa.launchpad.net/alexlarsson/flatpak/ubuntu bionic main' &
+  logger -st kubespray-$ip "add kube user into ubuntu group"
+  ssh $PI@$ip sudo usermod -a -G ubuntu kube
+  logger -st kubespray-$ip "disable ubuntu firewall"
+  ssh $PI@$ip sudo ufw disable
   # logger -st kubespray-$ip "Launchpad PPA repository keys"
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367 &
   # ssh $PI@$ip sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8becf1637ad8c79d &

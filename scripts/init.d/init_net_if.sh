@@ -4,7 +4,16 @@ export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 source .hap-wiz-env.sh
 yaml='02-hostap.yaml'
 clientyaml='01-cliwpa.yaml'
+function nameservers() {
+  nameservers=$1
+  [ "$#" -gt 1 ] && [ ! -z $nameservers ] && [ $nameservers != "''" ] && shift && echo -e "${nameservers},$(nameservers $*)" && return
+  [ "$#" -gt 1 ] && shift && echo -e "$(nameservers $*)" && return
+  echo $nameservers
+}
+nameservers_def='${NET}.1'
+nameservers6_def="'${NET6}1'"
 nameservers=''
+nameservers6="''"
 NP_ORIG=${work_dir}../../.netplan-store && sudo mkdir -p $NP_ORIG
 logger -st netplan "disable cloud-init"
 sudo mv -fv /etc/netplan/50-cloud-init.yaml $NP_ORIG
@@ -43,7 +52,9 @@ while [ "$#" -gt 0 ]; do case $1 in
     fi
     return;;
   --dns)
-      nameservers="${nameservers}, $2";;
+      nameservers_def=''
+      nameservers6_def="''"
+      nameservers=$(nameservers $2);;
   --wifi)
     if [ -f /etc/init.d/networking ]; then
       echo -e "${MARKER_BEGIN}
@@ -90,7 +101,7 @@ iface br0 inet dhcp
  address 10.33.0.1
  network 10.33.0.0
  netmask 255.255.255.0
- nameservers 10.33.0.1$nameservers
+ nameservers $nameservers
 bridge_ports wlan0 ${INT}
 ${MARKER_END}" | sudo tee -a /etc/network/interfaces
      logger -st brctl "share the internet wireless over bridge"
@@ -106,7 +117,7 @@ ${MARKER_END}" | sudo tee -a /etc/network/interfaces
       dhcp6: yes
       addresses: [10.33.0.1/24, '2001:db8:1:46::1/64']
       nameservers:
-        addresses: [10.33.0.1, '2001:db8:1:46::1'$nameservers]
+        addresses: [$(nameservers $nameservers_def $nameservers $nameservers6_def $nameservers6)]
       interfaces:
         - wlan0
         - eth0
@@ -114,19 +125,20 @@ ${MARKER_END}" | sudo tee -a /etc/netplan/$yaml
    fi;;
    *);;
 esac; shift; done
+logger -st network "add wifi network"
 if [ -f /etc/init.d/networking ]; then
     sudo sed -i s/"iface wlan0 inet dhcp"/"\\n\
 iface wlan0 inet manual\\n\
  address ${NET}.1\\n\
  network ${NET}.0\\n\
  netmask ${MASK}\\n\
- nameservers ${NET}.1$nameservers"/ /etc/network/interfaces
+ nameservers $(nameservers $nameservers_def $nameservers)"/ /etc/network/interfaces
     cat /etc/network/interfaces | grep -A4 "iface wlan0"
 else
     sudo sed -i /"password:"/a"\\
       addresses: [${NET}.1/24, '${NET6}1/64']\\n\
       nameservers:\\n\
-        addresses: [${NET}.1, '${NET6}1'$nameservers]" /etc/netplan/$clientyaml
+        addresses: [$(nameservers $nameservers_def $nameservers $nameservers6_def $nameservers6)]" /etc/netplan/$clientyaml
     sudo sed -i /"wlan0:"/,/"${MARKER_END}"/s/yes/no/g /etc/netplan/$clientyaml
     cat /etc/netplan/$clientyaml | grep -A8 "wlan0"
 fi
