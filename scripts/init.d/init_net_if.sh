@@ -2,18 +2,13 @@
 export work_dir=$(echo $0 | awk -F'/' '{ print $1 }')'/'
 [ ! -f .hap-wiz-env.sh ] && python3 ${work_dir}../library/hap-wiz-env.py $*
 source .hap-wiz-env.sh
+source .hap-wiz-lib.sh
 yaml='02-hostap.yaml'
 clientyaml='01-cliwpa.yaml'
-function nameservers() {
-  nameservers=$1
-  [ "$#" -gt 1 ] && [ ! -z $nameservers ] && [ $nameservers != "''" ] && shift && echo -e "${nameservers},$(nameservers $*)" && return
-  [ "$#" -gt 1 ] && shift && echo -e "$(nameservers $*)" && return
-  echo $nameservers
-}
-nameservers_def='${NET}.1'
-nameservers6_def="'${NET6}1'"
+nameservers_def="${NET}.1"
+nameservers6_def="${NET6}1"
 nameservers=''
-nameservers6="''"
+nameservers6=''
 NP_ORIG=${work_dir}../../.netplan-store && sudo mkdir -p $NP_ORIG
 logger -st netplan "disable cloud-init"
 sudo mv -fv /etc/netplan/50-cloud-init.yaml $NP_ORIG
@@ -53,8 +48,12 @@ while [ "$#" -gt 0 ]; do case $1 in
     return;;
   --dns)
       nameservers_def=''
-      nameservers6_def="''"
-      nameservers=$(nameservers $2);;
+      nameservers=$(nameservers $nameservers $2)
+      shift;;
+  --dns6)
+      nameservers6_def=''
+      nameservers6=$(nameservers $nameservers6 $2)
+      shift;;
   --wifi)
     if [ -f /etc/init.d/networking ]; then
       echo -e "${MARKER_BEGIN}
@@ -78,9 +77,10 @@ network:
           password: \"$3\"
 ${MARKER_END}" | sudo tee /etc/netplan/$clientyaml
     fi
+    shift;shift
     ;;
   -h*|--help)
-    echo -e "Usage: $0 [-r] [[--wifi <SSID> <passphrase>] [-b, --bridge]] [--dns <ipv4 or ipv6>]
+    echo -e "Usage: $0 [-r] [[--wifi <SSID> <passphrase>] [-b, --bridge]] [--dns <ipv4> [--dns6 '<ipv6>']
     Initializes netplan.io networks plans and eventually restart them.
     -r
       Removes bridge interface
@@ -89,8 +89,10 @@ ${MARKER_END}" | sudo tee /etc/netplan/$clientyaml
     --bridge
       Render a bridge connection between ${INT} and wlan0, skipping private network ${NET}.0 (should be used with --wifi)
     --dns
-      Add a public custom DNS address (e.g. 8.8.4.4)"
-      exit 1;;
+      Add a public custom DNS address (e.g. --dns 8.8.8.8 --dns 9.9.9.9)
+    --dns6
+      Add a public custom DNS ipv6 address, (e.g. --dns6 2001:4860:4860::8888 --dns6 2001:4860:4860::8844)"
+          exit 1;;
    -b*|--bridge)
    if [ -f /etc/init.d/networking ]; then
    # ubuntu < 18.04
@@ -117,7 +119,7 @@ ${MARKER_END}" | sudo tee -a /etc/network/interfaces
       dhcp6: yes
       addresses: [10.33.0.1/24, '2001:db8:1:46::1/64']
       nameservers:
-        addresses: [$(nameservers $nameservers_def $nameservers $nameservers6_def $nameservers6)]
+        addresses: [${nameservers},${nameservers6}]
       interfaces:
         - wlan0
         - eth0
@@ -125,6 +127,8 @@ ${MARKER_END}" | sudo tee -a /etc/netplan/$yaml
    fi;;
    *);;
 esac; shift; done
+nameservers=$(nameservers $nameservers $nameservers_def)
+nameservers6=$(nameservers $nameservers6 $nameservers6_def)
 logger -st network "add wifi network"
 if [ -f /etc/init.d/networking ]; then
     sudo sed -i s/"iface wlan0 inet dhcp"/"\\n\
@@ -132,13 +136,13 @@ iface wlan0 inet manual\\n\
  address ${NET}.1\\n\
  network ${NET}.0\\n\
  netmask ${MASK}\\n\
- nameservers $(nameservers $nameservers_def $nameservers)"/ /etc/network/interfaces
+ nameservers ${nameservers}"/ /etc/network/interfaces
     cat /etc/network/interfaces | grep -A4 "iface wlan0"
 else
     sudo sed -i /"password:"/a"\\
       addresses: [${NET}.1/24, '${NET6}1/64']\\n\
       nameservers:\\n\
-        addresses: [$(nameservers $nameservers_def $nameservers $nameservers6_def $nameservers6)]" /etc/netplan/$clientyaml
+        addresses: [${nameservers},${nameservers6}]" /etc/netplan/$clientyaml
     sudo sed -i /"wlan0:"/,/"${MARKER_END}"/s/yes/no/g /etc/netplan/$clientyaml
     cat /etc/netplan/$clientyaml | grep -A8 "wlan0"
 fi

@@ -112,7 +112,7 @@ if [ -z $CLIENT ]; then case $SHARE in
    'y'*|'Y'*)
       logger -st brctl "share internet connection from ${INT} to wlan0 over bridge"
       sudo sed -i /bridge=br0/s/^\#// /etc/hostapd/hostapd.conf
-      source ${work_dir}init.d/init_net_if.sh --wifi '' '' --dns 8.8.8.8 --dns 9.9.9.9 --bridge
+      source ${work_dir}init.d/init_net_if.sh --wifi '' '' -dns6 2001:4860:4860::8888 --dns6 2001:4860:4860::8844 --bridge
       ;;
   'n'*|'N'*)
     [ -z $(which dnsmasq) ] && sudo apt-get -y install dnsmasq
@@ -138,11 +138,11 @@ dhcp-range=${NET}.15,${NET}.100,${MASK},${MASKb}h
     ;;
   *)
     logger -st network "rendering configuration for router mode"
-    source ${work_dir}init.d/init_net_if.sh --wifi '' '' --dns 8.8.8.8 --dns 9.9.9.9
+    source ${work_dir}init.d/init_net_if.sh --wifi '' '' --dns6 2001:4860:4860::8888 --dns6 2001:4860:4860::8844
   ;;
 esac;
     logger -st dhcpd  "configure dynamic dhcp addresses ${NET}.${NET_start}-${NET_end}"
-    source ${work_dir}init.d/init_dhcp_serv.sh --dns 8.8.8.8 --dns 9.9.9.9 --router ${NET}.1 --router6 ${NET6}1
+    source ${work_dir}init.d/init_dhcp_serv.sh --dns6 2001:4860:4860::8888 --dns6 2001:4860:4860::8844 --router ${NET}.1
 else
   source ${work_dir}init.d/init_net_if.sh --wifi $SSID $PAWD
 fi

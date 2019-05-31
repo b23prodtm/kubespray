@@ -109,6 +109,7 @@ def main(argv):
         if myenv["CHANNEL"] == "": myenv["CHANNEL"] = "0"
     os.environ.update(myenv)
     write_exports(myenv)
+    write_lib()
 
 def write_exports(envdict):
     path=".hap-wiz-env.sh"
@@ -116,6 +117,25 @@ def write_exports(envdict):
     f.write("#!/usr/bin/env bash\nexport")
     for k,v in myenv.items():
         f.write(" '{}'=\"{}\"".format(k,v))
+    f.close()
+    os.chmod(path, 0o755)
+
+def write_lib():
+    path=".hap-wiz-lib.sh"
+    f = open(path, "w")
+    f.write("#!/usr/bin/env bash\n")
+    f.write("function nameservers() {\n\
+      nameservers=$1\n\
+      sep=''\n\
+      while [ \"$#\" -gt 1 ]; do case $2 in\n\
+        \"''\"|'' );;\n\
+          *)\n\
+            [ ! -z $nameservers ] && [ $nameservers != \"''\" ] && sep=','\n\
+            nameservers=\"${nameservers}${sep}'$2'\";;\n\
+      esac; shift; done\n\
+      [ ! -z $nameservers ] && [ $nameservers != \"''\" ] && echo $nameservers | sed -e s/,,//g -e s/,$// -e s/^,//\n\
+    }\n\
+")
     f.close()
     os.chmod(path, 0o755)
 
