@@ -53,7 +53,7 @@ Usage: $0 [-r] [--router <ipv4>] [--dns <ipv4>] [--dns6 <ipv6>]
     nameservers=$(nameservers $nameservers $2)
     shift;;
   --dns6)
-    nameservers6=$(nameservers $nameservers6 $2)
+    nameservers6=$(nameservers $nameservers6 "'$2'")
     shift;;
   --router)
     routers="option routers $2;"

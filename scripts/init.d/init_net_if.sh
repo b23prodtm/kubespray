@@ -52,7 +52,7 @@ while [ "$#" -gt 0 ]; do case $1 in
       shift;;
   --dns6)
       nameservers6_def=''
-      nameservers6=$(nameservers $nameservers6 $2)
+      nameservers6=$(nameservers $nameservers6 "'$2'")
       shift;;
   --wifi)
     if [ -f /etc/init.d/networking ]; then
@@ -128,7 +128,7 @@ ${MARKER_END}" | sudo tee -a /etc/netplan/$yaml
    *);;
 esac; shift; done
 nameservers=$(nameservers $nameservers $nameservers_def)
-nameservers6=$(nameservers $nameservers6 $nameservers6_def)
+nameservers6=$(nameservers $nameservers6 "'${nameservers6_def}'")
 logger -st network "add wifi network"
 if [ -f /etc/init.d/networking ]; then
     sudo sed -i s/"iface wlan0 inet dhcp"/"\\n\

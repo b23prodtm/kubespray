@@ -125,15 +125,15 @@ def write_lib():
     f = open(path, "w")
     f.write("#!/usr/bin/env bash\n")
     f.write("function nameservers() {\n\
-      nameservers=$1\n\
+      ns=$1\n\
       sep=''\n\
       while [ \"$#\" -gt 1 ]; do case $2 in\n\
         \"''\"|'' );;\n\
           *)\n\
-            [ ! -z $nameservers ] && [ $nameservers != \"''\" ] && sep=','\n\
-            nameservers=\"${nameservers}${sep}'$2'\";;\n\
+            [ $ns != '' ] && [ $ns != \"''\" ] && sep=','\n\
+            ns=\"${ns}${sep}$2\";;\n\
       esac; shift; done\n\
-      [ ! -z $nameservers ] && [ $nameservers != \"''\" ] && echo $nameservers | sed -e s/,,//g -e s/,$// -e s/^,//\n\
+      [ $ns != '' ] && [ $ns != \"''\" ] && echo $ns | sed -e s/,,//g -e s/,$// -e s/^,//\n\
     }\n\
 ")
     f.close()
