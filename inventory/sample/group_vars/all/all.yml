@@ -87,8 +87,11 @@ loadbalancer_apiserver_healthcheck_port: 8081
 # kube_read_only_port: 10255
 
 ## Set true to download and cache container
-# download_container: true
-
+download_container: false
+skip_downloads: false
+## download_localhost and download_run_once support only for docker. See https://github.com/containerd/containerd/issues/4075 for details
+download_localhost: false
+download_run_once: false
 ## Deploy container engine
 # Set false if you want to deploy container engine manually.
 # deploy_container_engine: true

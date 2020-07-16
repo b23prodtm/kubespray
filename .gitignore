@@ -99,7 +99,7 @@ target/
 ENV/
 
 # extra_scripts
-extra_scripts/*
+# extra_scripts/*
 
 # Tests
 tests-results/

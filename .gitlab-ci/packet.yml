@@ -6,33 +6,33 @@
     SSH_USER: "kubespray"
   tags:
     - packet
-  only: [/^pr-.*$/]
+  # only: [/^pr-.*$/]
   except: ['triggers']
 
 packet_ubuntu18-calico-aio:
   stage: deploy-part1
   extends: .packet
-  when: on_success
+  when: manual
 
 # Future AIO job
 packet_ubuntu20-calico-aio:
   stage: deploy-part1
   extends: .packet
-  when: on_success
+  when: manual
 
 # ### PR JOBS PART2
 
 packet_centos7-flannel-containerd-addons-ha:
   extends: .packet
   stage: deploy-part2
-  when: on_success
+  when: manual
   variables:
     MITOGEN_ENABLE: "true"
 
 packet_centos7-crio:
   extends: .packet
   stage: deploy-part2
-  when: on_success
+  when: manual
   variables:
     MITOGEN_ENABLE: "true"
 
@@ -46,7 +46,7 @@ packet_ubuntu18-crio:
 packet_ubuntu16-canal-kubeadm-ha:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
 
 packet_ubuntu16-canal-sep:
   stage: deploy-special
@@ -71,14 +71,14 @@ packet_ubuntu16-kube-router-svc-proxy:
 packet_debian10-containerd:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     MITOGEN_ENABLE: "true"
 
 packet_centos7-calico-ha-once-localhost:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     # This will instruct Docker not to start over TLS.
     DOCKER_TLS_CERTDIR: ""
@@ -88,28 +88,28 @@ packet_centos7-calico-ha-once-localhost:
 packet_centos8-kube-ovn:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
 
 packet_centos8-calico:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
 
 packet_fedora30-weave:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
 
 packet_opensuse-canal:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
 
 # Contiv does not work in k8s v1.16
 # packet_ubuntu16-contiv-sep:
 #   stage: deploy-part2
 #   extends: .packet
-#   when: on_success
+#   when: manual
 
 # ### MANUAL JOBS
 
@@ -161,7 +161,7 @@ packet_oracle7-canal-ha:
 packet_fedora31-flannel:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     MITOGEN_ENABLE: "true"
 
@@ -173,7 +173,7 @@ packet_amazon-linux-2-aio:
 packet_fedora30-cilium-containerd:
   stage: deploy-part2
   extends: .packet
-  when: on_success
+  when: manual
 
 # ### PR JOBS PART3
 # Long jobs (45min+)
@@ -181,7 +181,7 @@ packet_fedora30-cilium-containerd:
 packet_centos7-weave-upgrade-ha:
   stage: deploy-part3
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     UPGRADE_TEST: basic
     MITOGEN_ENABLE: "false"
@@ -189,7 +189,7 @@ packet_centos7-weave-upgrade-ha:
 packet_debian9-calico-upgrade:
   stage: deploy-part3
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     UPGRADE_TEST: graceful
     MITOGEN_ENABLE: "false"
@@ -197,7 +197,7 @@ packet_debian9-calico-upgrade:
 packet_debian9-calico-upgrade-once:
   stage: deploy-part3
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     UPGRADE_TEST: graceful
     MITOGEN_ENABLE: "false"
@@ -205,7 +205,7 @@ packet_debian9-calico-upgrade-once:
 packet_ubuntu18-calico-ha-recover:
   stage: deploy-part3
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     RECOVER_CONTROL_PLANE_TEST: "true"
     RECOVER_CONTROL_PLANE_TEST_GROUPS: "etcd[2:],kube-master[1:]"
@@ -213,7 +213,7 @@ packet_ubuntu18-calico-ha-recover:
 packet_ubuntu18-calico-ha-recover-noquorum:
   stage: deploy-part3
   extends: .packet
-  when: on_success
+  when: manual
   variables:
     RECOVER_CONTROL_PLANE_TEST: "true"
     RECOVER_CONTROL_PLANE_TEST_GROUPS: "etcd[1:],kube-master[1:]"
